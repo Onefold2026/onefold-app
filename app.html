@@ -570,7 +570,7 @@
       <div class="section" id="s-gastos">
         <div class="section-header">
           <div class="section-title">Compras y gastos operativos del mes</div>
-          <button class="btn btn-primary" onclick="abrirModal('modal-gasto')">
+          <button class="btn btn-primary" onclick="nuevoGasto()">
             <i class="ti ti-plus"></i>Registrar gasto manual
           </button>
         </div>
@@ -865,10 +865,11 @@
 <div class="modal-overlay" id="modal-gasto">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Registrar gasto manual</div>
+      <div class="modal-title" id="modal-gasto-titulo">Registrar gasto manual</div>
       <button class="modal-close" onclick="cerrarModal('modal-gasto')">✕</button>
     </div>
     <div class="modal-body">
+      <input type="hidden" id="g-edit-id">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Fecha *</label>
@@ -1182,10 +1183,12 @@ async function cargarDashboard() {
     }
 
     // ── Filtros ────────────────────────────────────────────────
-    const vMes    = filtrarMes(ventas);
+    // Solo pedidos Shopify efectivamente pagados (excluye pendientes/fallidos)
+    const soloPagados = v => { const e = (v.Estado_Pedido||'').toLowerCase(); return e.includes('pagado') || e.includes('paid'); };
+    const vMes    = filtrarMes(ventas).filter(soloPagados);
     const waMes   = filtrarMes(ventasWA);
     const gMes    = filtrarMes(gastos);
-    const vAnio   = filtrarAnio(ventas);
+    const vAnio   = filtrarAnio(ventas).filter(soloPagados);
     const waAnio  = filtrarAnio(ventasWA);
     const gAnio   = filtrarAnio(gastos);
 
@@ -1339,7 +1342,8 @@ async function cargarVentas() {
     leerHoja('Ventas_Shopify!A:V'),
     leerHoja('Ventas_WhatsApp!A:S')
   ]);
-  const vMes  = filtrarMes(ventas);
+  const soloPagados = v => { const e = (v.Estado_Pedido||'').toLowerCase(); return e.includes('pagado') || e.includes('paid'); };
+  const vMes  = filtrarMes(ventas).filter(soloPagados);
   const waMes = filtrarMes(ventasWA);
 
   const totalShopify = vMes.reduce((s,p) => s + (parseFloat(p.Total)||0), 0);
@@ -1419,7 +1423,8 @@ async function cargarCanales() {
     leerHoja('Ventas_Shopify!A:V'),
     leerHoja('Ventas_WhatsApp!A:S')
   ]);
-  const vMes  = filtrarMes(ventas);
+  const soloPagados = v => { const e = (v.Estado_Pedido||'').toLowerCase(); return e.includes('pagado') || e.includes('paid'); };
+  const vMes  = filtrarMes(ventas).filter(soloPagados);
   const waMes = filtrarMes(ventasWA);
   const byCanal = {};
   [...vMes, ...waMes].forEach(p => {
@@ -1654,7 +1659,7 @@ async function cargarPedidos() {
 
 // ── GASTOS ────────────────────────────────────
 async function cargarGastos() {
-  const gastos = await leerHoja('Gastos_Operativos!A:J');
+  const gastos = await leerHoja('Gastos_Operativos!A:K');
   const gMes   = filtrarMes(gastos);
 
   const CATS_MATERIALES = ['Materiales'];
@@ -1685,7 +1690,7 @@ async function cargarGastos() {
     </div>
     <div class="card">
       <table>
-        <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Valor</th><th>Fuente</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Valor</th><th>Fuente</th><th></th></tr></thead>
         <tbody>
           ${gMes.map(g => `
             <tr>
@@ -1694,6 +1699,10 @@ async function cargarGastos() {
               <td>${g.Descripcion||'—'}</td>
               <td>${cop(g.Valor)}</td>
               <td>${g.Fuente||'Manual'}</td>
+              <td style="white-space:nowrap">${(g.Fuente||'Manual')==='Manual' ? `
+                <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;" onclick='editarGasto(${JSON.stringify(g)})'>✏️</button>
+                <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--rojo);" onclick="eliminarGasto('${g.ID}')">🗑️</button>
+              ` : ''}</td>
             </tr>
           `).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">Sin registros este mes</td></tr>'}
         </tbody>
@@ -1704,7 +1713,7 @@ async function cargarGastos() {
 // ── ROAS ──────────────────────────────────────
 async function cargarROAS() {
   const ventas = await leerHoja('Ventas_Shopify!A:V');
-  const gastos = await leerHoja('Gastos_Operativos!A:J');
+  const gastos = await leerHoja('Gastos_Operativos!A:K');
   const vMes   = filtrarMes(ventas);
   const gMes   = filtrarMes(gastos);
 
@@ -2003,7 +2012,7 @@ function calcularTotalEwa() {
   // El total en edición lo mantiene el usuario; no recalculamos automáticamente
 }
 
-function editarVentaWA(p) {
+async function editarVentaWA(p) {
   document.getElementById('ewa-id').value        = p.ID_Pedido || '';
   document.getElementById('ewa-fecha').value     = fechaToInput(p.Fecha);
   document.getElementById('ewa-cliente').value   = p.Cliente || '';
@@ -2020,6 +2029,44 @@ function editarVentaWA(p) {
   const canalSel = document.getElementById('ewa-canal');
   const can = p.Canal_Atribucion || 'WhatsApp directo';
   [...canalSel.options].forEach(o => { o.selected = o.value === can; });
+
+  // Cargar catálogo si no está cargado
+  if (_waCatalogo.length === 0) {
+    const lista = document.getElementById('ewa-productos-lista');
+    lista.innerHTML = '<div style="font-size:12px;color:var(--muted)">Cargando catálogo...</div>';
+    try {
+      const [prods, recetas] = await Promise.all([
+        leerHoja('Productos!A:K'),
+        leerHoja('Recetas!A:E')
+      ]);
+      _waComboMap = {};
+      recetas.forEach(r => {
+        const cid = r.ID_combo;
+        if (!cid) return;
+        if (!_waComboMap[cid]) _waComboMap[cid] = [];
+        _waComboMap[cid].push({ producto_id: r.producto_id, cantidad: parseInt(r.cantidad) || 1 });
+      });
+      const comboIds = new Set(Object.keys(_waComboMap));
+      _waCatalogo = prods
+        .filter(pr => {
+          const activo = (pr.Activo || '').toUpperCase().trim();
+          return activo !== 'NO' && activo !== 'FALSE' && activo !== '0' &&
+                 !(pr.Nombre || '').includes('USO INTERNO');
+        })
+        .map(pr => ({
+          ID_Producto: pr.ID_Producto,
+          SKU:         pr.SKU,
+          Nombre:      pr.Nombre,
+          Precio:      parseFloat(pr.Precio_Venta) || 0,
+          esCombo:     comboIds.has(pr.ID_Producto)
+        }))
+        .sort((a, b) => a.Nombre.localeCompare(b.Nombre));
+    } catch(e) {
+      document.getElementById('ewa-productos-lista').innerHTML =
+        '<div style="color:var(--rojo);font-size:12px">Error cargando catálogo</div>';
+      return;
+    }
+  }
 
   // Poblar líneas de productos
   const lista = document.getElementById('ewa-productos-lista');
@@ -2157,7 +2204,50 @@ async function guardarCompra() {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
+function nuevoGasto() {
+  document.getElementById('g-edit-id').value = '';
+  document.getElementById('modal-gasto-titulo').textContent = 'Registrar gasto manual';
+  ['g-fecha','g-descripcion','g-valor','g-beneficiario','g-notas','g-categoria-otra'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('g-categoria').selectedIndex = 0;
+  document.getElementById('g-categoria-otra-wrap').style.display = 'none';
+  abrirModal('modal-gasto');
+}
+
+function editarGasto(g) {
+  document.getElementById('g-edit-id').value   = g.ID || '';
+  document.getElementById('g-fecha').value     = fechaToInput(g.Fecha);
+  document.getElementById('g-descripcion').value = g.Descripcion || '';
+  document.getElementById('g-valor').value     = g.Valor || '';
+  document.getElementById('g-beneficiario').value = g.Beneficiario || '';
+  document.getElementById('g-notas').value     = g.Notas || '';
+  const catSel = document.getElementById('g-categoria');
+  const catValores = [...catSel.options].map(o => o.value);
+  if (catValores.includes(g.Categoria)) {
+    catSel.value = g.Categoria;
+    document.getElementById('g-categoria-otra-wrap').style.display = 'none';
+  } else {
+    catSel.value = 'Otra';
+    document.getElementById('g-categoria-otra').value = g.Categoria || '';
+    document.getElementById('g-categoria-otra-wrap').style.display = 'block';
+  }
+  document.getElementById('modal-gasto-titulo').textContent = `Editar gasto ${g.ID}`;
+  abrirModal('modal-gasto');
+}
+
+async function eliminarGasto(id) {
+  if (!id) { alert('No se encontró el ID del gasto'); return; }
+  if (!confirm(`¿Eliminar el gasto ${id}? Esta acción no se puede deshacer.`)) return;
+  try {
+    await enviarScript('eliminar_gasto_manual', { ID: id });
+    alert('✅ Gasto eliminado');
+    cargarSeccion('gastos');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
 async function guardarGasto() {
+  const editId      = document.getElementById('g-edit-id').value;
   const fecha       = document.getElementById('g-fecha').value;
   const desc        = document.getElementById('g-descripcion').value;
   const valor       = document.getElementById('g-valor').value;
@@ -2167,17 +2257,26 @@ async function guardarGasto() {
   const categoria   = catSelect === 'Otra' ? (catOtra || 'Otra') : catSelect;
   if (!fecha || !desc || !valor) { alert('Completa los campos obligatorios (*)'); return; }
   if (catSelect === 'Otra' && !catOtra) { alert('Escribe la categoría en el campo de texto'); return; }
+  const payload = {
+    Fecha:        fecha,
+    Categoria:    categoria,
+    Beneficiario: beneficiario,
+    Descripcion:  desc,
+    Valor:        parseFloat(valor),
+    Notas:        document.getElementById('g-notas').value
+  };
   try {
-    await enviarScript('gasto_manual', {
-      Fecha:        fecha,
-      Categoria:    categoria,
-      Beneficiario: beneficiario,
-      Descripcion:  desc,
-      Valor:        parseFloat(valor),
-      Notas:        document.getElementById('g-notas').value
-    });
-    cerrarModal('modal-gasto');
-    alert('✅ Gasto registrado correctamente');
+    if (editId) {
+      await enviarScript('actualizar_gasto_manual', { ...payload, ID: editId });
+      cerrarModal('modal-gasto');
+      document.getElementById('g-edit-id').value = '';
+      document.getElementById('modal-gasto-titulo').textContent = 'Registrar gasto manual';
+      alert('✅ Gasto actualizado');
+    } else {
+      await enviarScript('gasto_manual', payload);
+      cerrarModal('modal-gasto');
+      alert('✅ Gasto registrado correctamente');
+    }
     cargarSeccion('gastos');
   } catch(e) { alert('Error: ' + e.message); }
 }
