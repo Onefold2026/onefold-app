@@ -437,9 +437,14 @@
             <div class="metric-sub" id="m-ventas-sub">Cargando...</div>
           </div>
           <div class="metric-card">
-            <div class="metric-label">Pedidos</div>
-            <div class="metric-value" id="m-pedidos">—</div>
-            <div class="metric-sub" id="m-pedidos-sub">Cargando...</div>
+            <div class="metric-label">Pedidos Shopify</div>
+            <div class="metric-value" id="m-pedidos-shopify">—</div>
+            <div class="metric-sub" id="m-pedidos-shopify-sub">Cargando...</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Pedidos WhatsApp</div>
+            <div class="metric-value" id="m-pedidos-wa">—</div>
+            <div class="metric-sub" id="m-pedidos-wa-sub">Cargando...</div>
           </div>
           <div class="metric-card">
             <div class="metric-label">Ticket promedio</div>
@@ -1229,19 +1234,21 @@ async function cargarDashboard() {
     const desgloseOrdenado = Object.entries(desglose).sort((a,b) => b[1] - a[1]);
 
     // ── DOM: tarjetas mes ──────────────────────────────────────
-    document.getElementById('m-ventas').textContent        = cop(totalVentas);
-    document.getElementById('m-pedidos').textContent       = totalPedidos;
-    document.getElementById('m-ticket').textContent        = cop(ticket);
-    document.getElementById('m-cogs').textContent          = cop(totalCOGS);
-    document.getElementById('m-cogs-sub').textContent      = cogsEsEstimado ? '⚠ Sin costos configurados' : `${cogsConCosto} productos con costo`;
-    document.getElementById('m-util-bruta').textContent    = cop(utilBruta);
-    document.getElementById('m-gastos').textContent        = cop(totalGastos);
-    document.getElementById('m-util-neta').textContent     = cop(utilNeta);
-    document.getElementById('m-ventas-sub').textContent    = getMesLabel();
-    document.getElementById('m-pedidos-sub').textContent   = `${vMes.length} Shopify + ${waMes.length} WA`;
-    document.getElementById('m-gastos-sub').textContent    = `${gMes.length} registros`;
-    document.getElementById('m-margen').textContent        = `Margen neto: ${margen}%`;
-    document.getElementById('dash-mes-label').textContent  = getMesLabel();
+    document.getElementById('m-ventas').textContent               = cop(totalVentas);
+    document.getElementById('m-pedidos-shopify').textContent      = vMes.length;
+    document.getElementById('m-pedidos-shopify-sub').textContent  = getMesLabel();
+    document.getElementById('m-pedidos-wa').textContent           = waMes.length;
+    document.getElementById('m-pedidos-wa-sub').textContent       = getMesLabel();
+    document.getElementById('m-ticket').textContent               = cop(ticket);
+    document.getElementById('m-cogs').textContent                 = cop(totalCOGS);
+    document.getElementById('m-cogs-sub').textContent             = cogsEsEstimado ? '⚠ Sin costos configurados' : `${cogsConCosto} productos con costo`;
+    document.getElementById('m-util-bruta').textContent           = cop(utilBruta);
+    document.getElementById('m-gastos').textContent               = cop(totalGastos);
+    document.getElementById('m-util-neta').textContent            = cop(utilNeta);
+    document.getElementById('m-ventas-sub').textContent           = getMesLabel();
+    document.getElementById('m-gastos-sub').textContent           = `${gMes.length} registros`;
+    document.getElementById('m-margen').textContent               = `Margen neto: ${margen}%`;
+    document.getElementById('dash-mes-label').textContent         = getMesLabel();
 
     // ── YTD ───────────────────────────────────────────────────
     const ytdVentas  = [...vAnio, ...waAnio].reduce((s, r) => s + (parseFloat(r.Total)||0), 0);
@@ -1258,7 +1265,7 @@ async function cargarDashboard() {
     document.getElementById('ytd-gastos').textContent      = cop(ytdGastos);
     document.getElementById('ytd-util-neta').textContent   = cop(ytdUtil);
     document.getElementById('ytd-ventas-sub').textContent  = `Ene — ${getMesLabel().split(' ')[0]} ${anioActual}`;
-    document.getElementById('ytd-pedidos-sub').textContent = `${vAnio.length} Shopify + ${waAnio.length} WA`;
+    document.getElementById('ytd-pedidos-sub').textContent = `${vAnio.length} Shopify · ${waAnio.length} WhatsApp`;
     document.getElementById('ytd-gastos-sub').textContent  = `${gAnio.length} registros`;
     document.getElementById('ytd-margen').textContent      = `Margen neto: ${ytdMargen}%`;
 
