@@ -1848,7 +1848,7 @@ async function buscarOCrearContacto(nombre, email) {
 async function enviarFacturasAlegra() {
   const checks = [...document.querySelectorAll('.sel-pedido:checked')];
   if (checks.length === 0) { alert('Selecciona al menos un pedido para facturar.'); return; }
-  if (!confirm(`¿Enviar ${checks.length} pedido(s) a Alegra?`)) return;
+  if (!confirm(`¿Enviar ${checks.length} pedido(s) a Alegra en borrador?`)) return;
 
   const btn = document.querySelector('#s-facturacion .btn-primary');
   btn.disabled = true;
@@ -1856,20 +1856,26 @@ async function enviarFacturasAlegra() {
 
   try {
     const pedidos = checks.map(c => c.value);
-    let enviados = 0;
-    for (const idPedido of pedidos) {
-      await fetch(ALEGRA_WEBHOOK, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({ idPedido })
-      });
-      enviados++;
-      await new Promise(r => setTimeout(r, 800));
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'facturar_alegra', pedidos })
+    });
+    const data = await res.json();
+
+    if (data.estado === 'ok') {
+      const ok  = (data.resultados || []).filter(r => r.ok).length;
+      const err = (data.resultados || []).filter(r => !r.ok);
+      let msg = `✅ ${ok} factura(s) creada(s) en borrador en Alegra.`;
+      if (err.length > 0) {
+        msg += `\n\n⚠️ ${err.length} pedido(s) con error:\n` + err.map(r => `• #${r.id}: ${r.msg}`).join('\n');
+      }
+      alert(msg);
+      await cargarSeccion('facturacion');
+    } else {
+      alert('Error al facturar: ' + (data.mensaje || JSON.stringify(data)));
     }
-    alert(`✅ ${enviados} pedido(s) enviados a Alegra.\n\nEspera unos segundos y recarga Facturación para ver el resultado.`);
-    setTimeout(() => cargarSeccion('facturacion'), 5000);
   } catch(e) {
-    alert('Error: ' + e.message);
+    alert('Error de conexión: ' + e.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-send"></i>Enviar selección a Alegra';
