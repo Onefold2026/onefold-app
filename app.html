@@ -1165,7 +1165,7 @@ async function cargarDashboard() {
       leerHoja('Ventas_Shopify!A:V'),
       leerHoja('Ventas_WhatsApp!A:S'),
       leerHoja('Gastos_Operativos!A:J'),
-      leerHoja('Productos!A:K')
+      leerHoja('Productos!A:AD')
     ]);
 
     // ── Mapa de costos por nombre de producto ──────────────────
@@ -1501,7 +1501,7 @@ async function cargarCompras() {
 
 // ── PRODUCTOS ─────────────────────────────────
 async function cargarProductos() {
-  const prods = await leerHoja('Productos!A:N');
+  const prods = await leerHoja('Productos!A:AD');
   const activos = prods.filter(p => {
     const activo = (p.Activo || '').toString().toUpperCase().trim();
     return activo !== 'NO' && activo !== 'FALSE' && activo !== '0';
@@ -1533,7 +1533,7 @@ let _productosIndividuales = [];
 
 async function cargarInventario() {
   const [prods, recetas] = await Promise.all([
-    leerHoja('Productos!A:K'),
+    leerHoja('Productos!A:AD'),
     leerHoja('Recetas!A:B')
   ]);
 
@@ -2049,7 +2049,7 @@ async function editarVentaWA(p) {
     lista.innerHTML = '<div style="font-size:12px;color:var(--muted)">Cargando catálogo...</div>';
     try {
       const [prods, recetas] = await Promise.all([
-        leerHoja('Productos!A:K'),
+        leerHoja('Productos!A:AD'),
         leerHoja('Recetas!A:E')
       ]);
       _waComboMap = {};
@@ -2344,7 +2344,7 @@ async function abrirModalVentaWA() {
       '<div style="font-size:12px;color:var(--muted)">Cargando catálogo...</div>';
     try {
       const [prods, recetas] = await Promise.all([
-        leerHoja('Productos!A:K'),
+        leerHoja('Productos!A:AD'),
         leerHoja('Recetas!A:E')
       ]);
 
