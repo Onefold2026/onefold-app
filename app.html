@@ -524,19 +524,6 @@
         </div>
       </div>
 
-      <!-- COMPRAS -->
-      <div class="section" id="s-compras">
-        <div class="section-header">
-          <div class="section-title">Compras del mes</div>
-          <button class="btn btn-primary" onclick="nuevaCompra()">
-            <i class="ti ti-plus"></i>Registrar compra
-          </button>
-        </div>
-        <div id="compras-tabla">
-          <div class="loading"><span class="spinner"></span>Cargando compras...</div>
-        </div>
-      </div>
-
       <!-- PRODUCTOS -->
       <div class="section" id="s-productos">
         <div class="section-header">
@@ -807,65 +794,6 @@
   </div>
 </div>
 
-<!-- Modal: Compra -->
-<div class="modal-overlay" id="modal-compra">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-compra-titulo">Registrar compra de inventario</div>
-      <button class="modal-close" onclick="cerrarModal('modal-compra')">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="c-edit-id">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Fecha *</label>
-          <input type="date" class="form-control" id="c-fecha">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Proveedor *</label>
-          <input type="text" class="form-control" id="c-proveedor">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Productos *</label>
-        <input type="text" class="form-control" id="c-productos" placeholder="Nombre de los productos">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Unidades</label>
-          <input type="number" class="form-control" id="c-unidades" placeholder="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Costo unitario</label>
-          <input type="number" class="form-control" id="c-costo-unitario" placeholder="0">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Total *</label>
-          <input type="number" class="form-control" id="c-total" placeholder="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Forma de pago</label>
-          <select class="form-control" id="c-forma-pago">
-            <option>Transferencia</option>
-            <option>Efectivo</option>
-            <option>Crédito</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notas</label>
-        <input type="text" class="form-control" id="c-notas">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('modal-compra')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarCompra()">Guardar compra</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal: Gasto manual -->
 <div class="modal-overlay" id="modal-gasto">
   <div class="modal">
@@ -883,18 +811,21 @@
         <div class="form-group">
           <label class="form-label">Categoría *</label>
           <select class="form-control" id="g-categoria" onchange="toggleCategoriaOtra(this.value)">
-            <option>Publicidad</option>
-            <option>Plataforma</option>
-            <option>Software</option>
-            <option>Logística</option>
-            <option>Comisión_Pasarela</option>
-            <option>Personal/Honorarios</option>
-            <option>Producción_Contenido</option>
-            <option>Administrativo</option>
-            <option>Materiales</option>
-            <option>Impuestos</option>
-            <option>Otros</option>
-            <option value="Otra">Otra (escribir)</option>
+            <optgroup label="── Materiales e insumos ──">
+              <option>Compras</option>
+              <option>Materiales</option>
+            </optgroup>
+            <optgroup label="── Gastos operativos ──">
+              <option>Publicidad</option>
+              <option>Plataforma</option>
+              <option>Logística</option>
+              <option>Comisión_Pasarela</option>
+              <option>Personal/Honorarios</option>
+              <option>Administrativo</option>
+              <option>Impuestos</option>
+              <option>Otros</option>
+              <option value="Otra">Otra (escribir)</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -1145,7 +1076,6 @@ async function cargarSeccion(seccion) {
       case 'dashboard':   await cargarDashboard(); break;
       case 'ventas':      await cargarVentas(); break;
       case 'canales':     await cargarCanales(); break;
-      case 'compras':     await cargarCompras(); break;
       case 'productos':   await cargarProductos(); break;
       case 'inventario':  await cargarInventario(); break;
       case 'pedidos':     await cargarPedidos(); break;
@@ -1461,44 +1391,6 @@ async function cargarCanales() {
     </div>`;
 }
 
-// ── COMPRAS ───────────────────────────────────
-async function cargarCompras() {
-  const compras = await leerHoja('Compras!A:L');
-  const cMes = filtrarMes(compras);
-  const total = cMes.reduce((s, c) => s + (parseFloat(c.Total)||0), 0);
-  document.getElementById('compras-tabla').innerHTML = `
-    <div class="metrics-row" style="margin-bottom:16px">
-      <div class="metric-card">
-        <div class="metric-label">Total compras</div>
-        <div class="metric-value">${cop(total)}</div>
-        <div class="metric-sub">${cMes.length} registros</div>
-      </div>
-    </div>
-    <div class="card">
-      <table>
-        <thead><tr><th>Fecha</th><th>Proveedor</th><th>Productos</th><th>Unidades</th><th>Costo unit.</th><th>Total</th><th>Forma pago</th><th>Estado</th><th></th></tr></thead>
-        <tbody>
-          ${cMes.map(c => `
-            <tr>
-              <td>${c.Fecha}</td>
-              <td><strong>${c.Proveedor||'—'}</strong></td>
-              <td>${c.Productos||'—'}</td>
-              <td>${c.Unidades||'—'}</td>
-              <td>${c.Costo_Unitario ? cop(c.Costo_Unitario) : '—'}</td>
-              <td>${cop(c.Total)}</td>
-              <td>${c.Forma_Pago||'—'}</td>
-              <td>${c.Estado_Pago ? `<span class="badge badge-${c.Estado_Pago==='Pagado'?'green':'orange'}">${c.Estado_Pago}</span>` : '—'}</td>
-              <td style="white-space:nowrap">
-                <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;" onclick='editarCompra(${JSON.stringify(c)})'>✏️</button>
-                <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--rojo);" onclick="eliminarCompra('${c.ID||c.id}')">🗑️</button>
-              </td>
-            </tr>
-          `).join('') || '<tr><td colspan="9" style="text-align:center;color:#999;padding:20px">Sin compras registradas este mes</td></tr>'}
-        </tbody>
-      </table>
-    </div>`;
-}
-
 // ── PRODUCTOS ─────────────────────────────────
 async function cargarProductos() {
   const prods = await leerHoja('Productos!A:AD');
@@ -1669,13 +1561,37 @@ async function cargarGastos() {
   const gastos = await leerHoja('Gastos_Operativos!A:K');
   const gMes   = filtrarMes(gastos);
 
-  const CATS_MATERIALES = ['Materiales'];
+  // Normalizar categorías inconsistentes del sheet
+  const NORM_CAT = {
+    'Logistica': 'Logística', 'logistica': 'Logística',
+    'personal/honorarios': 'Personal/Honorarios',
+    'Personal/honorarios': 'Personal/Honorarios',
+    'Pauta': 'Publicidad',
+    'Pasarela de pago': 'Comisión_Pasarela',
+    'Comision_Pasarela': 'Comisión_Pasarela',
+  };
+  gMes.forEach(g => { if (NORM_CAT[g.Categoria]) g.Categoria = NORM_CAT[g.Categoria]; });
+
+  const CATS_MATERIALES = ['Compras', 'Materiales'];
   const materiales  = gMes.filter(g => CATS_MATERIALES.includes(g.Categoria));
   const operativos  = gMes.filter(g => !CATS_MATERIALES.includes(g.Categoria));
 
   const totalMat = materiales.reduce((s,g) => s + (parseFloat(g.Valor)||0), 0);
   const totalOp  = operativos.reduce((s,g) => s + (parseFloat(g.Valor)||0), 0);
   const total    = totalMat + totalOp;
+
+  const filaGasto = g => `
+    <tr>
+      <td>${g.Fecha}</td>
+      <td><span class="badge badge-blue">${g.Categoria||'—'}</span></td>
+      <td>${g.Descripcion||'—'}</td>
+      <td>${cop(g.Valor)}</td>
+      <td>${g.Fuente||'Manual'}</td>
+      <td style="white-space:nowrap">${(g.Fuente||'Manual')==='Manual' ? `
+        <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;" onclick='editarGasto(${JSON.stringify(g)})'>✏️</button>
+        <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--rojo);" onclick="eliminarGasto('${g.ID_Gasto||g.ID}')">🗑️</button>
+      ` : ''}</td>
+    </tr>`;
 
   document.getElementById('gastos-tabla').innerHTML = `
     <div class="metrics-row" style="margin-bottom:20px;">
@@ -1695,23 +1611,23 @@ async function cargarGastos() {
         <div class="metric-sub">${materiales.length} registros · ${total>0?((totalMat/total)*100).toFixed(0):0}% del total</div>
       </div>
     </div>
-    <div class="card">
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="card-title">📦 Materiales e insumos</div></div>
       <table>
         <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Valor</th><th>Fuente</th><th></th></tr></thead>
         <tbody>
-          ${gMes.map(g => `
-            <tr>
-              <td>${g.Fecha}</td>
-              <td><span class="badge badge-blue">${g.Categoria||'—'}</span></td>
-              <td>${g.Descripcion||'—'}</td>
-              <td>${cop(g.Valor)}</td>
-              <td>${g.Fuente||'Manual'}</td>
-              <td style="white-space:nowrap">${(g.Fuente||'Manual')==='Manual' ? `
-                <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;" onclick='editarGasto(${JSON.stringify(g)})'>✏️</button>
-                <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--rojo);" onclick="eliminarGasto('${g.ID}')">🗑️</button>
-              ` : ''}</td>
-            </tr>
-          `).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">Sin registros este mes</td></tr>'}
+          ${materiales.map(filaGasto).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;padding:16px">Sin registros este mes</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">💼 Gastos operativos</div></div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Valor</th><th>Fuente</th><th></th></tr></thead>
+        <tbody>
+          ${operativos.map(filaGasto).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;padding:16px">Sin registros este mes</td></tr>'}
         </tbody>
       </table>
     </div>`;
@@ -2148,75 +2064,6 @@ async function eliminarVentaWA(id) {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
-// ── EDITAR / ELIMINAR COMPRA ──────────────────
-function nuevaCompra() {
-  document.getElementById('c-edit-id').value = '';
-  document.getElementById('modal-compra-titulo').textContent = 'Registrar compra de inventario';
-  // limpiar campos
-  ['c-fecha','c-proveedor','c-productos','c-unidades','c-costo-unitario','c-total','c-notas'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  abrirModal('modal-compra');
-}
-
-function editarCompra(c) {
-  const id = c.ID || c.id || '';
-  document.getElementById('c-edit-id').value        = id;
-  document.getElementById('c-fecha').value          = c.Fecha || '';
-  document.getElementById('c-proveedor').value      = c.Proveedor || '';
-  document.getElementById('c-productos').value      = c.Productos || '';
-  document.getElementById('c-unidades').value       = c.Unidades || '';
-  document.getElementById('c-costo-unitario').value = c.Costo_Unitario || '';
-  document.getElementById('c-total').value          = c.Total || '';
-  document.getElementById('c-notas').value          = c.Notas || '';
-  const formaPago = document.getElementById('c-forma-pago');
-  [...formaPago.options].forEach(o => { o.selected = o.value === c.Forma_Pago; });
-  document.getElementById('modal-compra-titulo').textContent = `Editar compra ${id}`;
-  abrirModal('modal-compra');
-}
-
-async function eliminarCompra(id) {
-  if (!id) { alert('No se encontró el ID de la compra'); return; }
-  if (!confirm(`¿Eliminar la compra ${id}? Esta acción no se puede deshacer.`)) return;
-  try {
-    await enviarScript('eliminar_compra', { ID: id });
-    alert('✅ Compra eliminada');
-    cargarSeccion('compras');
-  } catch(e) { alert('Error: ' + e.message); }
-}
-
-async function guardarCompra() {
-  const editId   = document.getElementById('c-edit-id').value;
-  const fecha    = document.getElementById('c-fecha').value;
-  const proveedor = document.getElementById('c-proveedor').value;
-  const total    = document.getElementById('c-total').value;
-  if (!fecha || !proveedor || !total) { alert('Completa los campos obligatorios (*)'); return; }
-  const payload = {
-    Fecha:          fecha,
-    Proveedor:      proveedor,
-    Productos:      document.getElementById('c-productos').value,
-    Unidades:       document.getElementById('c-unidades').value,
-    Costo_Unitario: document.getElementById('c-costo-unitario').value,
-    Total:          parseFloat(total),
-    Forma_Pago:     document.getElementById('c-forma-pago').value,
-    Notas:          document.getElementById('c-notas').value
-  };
-  try {
-    if (editId) {
-      await enviarScript('actualizar_compra', { ...payload, ID: editId });
-      cerrarModal('modal-compra');
-      document.getElementById('c-edit-id').value = '';
-      document.getElementById('modal-compra-titulo').textContent = 'Registrar compra de inventario';
-      alert('✅ Compra actualizada');
-    } else {
-      await enviarScript('compra', payload);
-      cerrarModal('modal-compra');
-      alert('✅ Compra registrada correctamente');
-    }
-    cargarSeccion('compras');
-  } catch(e) { alert('Error: ' + e.message); }
-}
-
 function nuevoGasto() {
   document.getElementById('g-edit-id').value = '';
   document.getElementById('modal-gasto-titulo').textContent = 'Registrar gasto manual';
@@ -2229,7 +2076,7 @@ function nuevoGasto() {
 }
 
 function editarGasto(g) {
-  document.getElementById('g-edit-id').value   = g.ID || '';
+  document.getElementById('g-edit-id').value   = g.ID_Gasto || g.ID || '';
   document.getElementById('g-fecha').value     = fechaToInput(g.Fecha);
   document.getElementById('g-descripcion').value = g.Descripcion || '';
   document.getElementById('g-valor').value     = g.Valor || '';
@@ -2245,7 +2092,7 @@ function editarGasto(g) {
     document.getElementById('g-categoria-otra').value = g.Categoria || '';
     document.getElementById('g-categoria-otra-wrap').style.display = 'block';
   }
-  document.getElementById('modal-gasto-titulo').textContent = `Editar gasto ${g.ID}`;
+  document.getElementById('modal-gasto-titulo').textContent = `Editar gasto ${g.ID_Gasto || g.ID}`;
   abrirModal('modal-gasto');
 }
 
