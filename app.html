@@ -562,9 +562,12 @@
       <div class="section" id="s-gastos">
         <div class="section-header">
           <div class="section-title">Compras y gastos operativos del mes</div>
-          <button class="btn btn-primary" onclick="nuevoGasto()">
-            <i class="ti ti-plus"></i>Registrar gasto manual
-          </button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" onclick="asignarIdsGastos()" title="Asigna IDs a los gastos manuales que no tienen ID en el Sheet">🔧 Asignar IDs</button>
+            <button class="btn btn-primary" onclick="nuevoGasto()">
+              <i class="ti ti-plus"></i>Registrar gasto manual
+            </button>
+          </div>
         </div>
         <div id="gastos-tabla">
           <div class="loading"><span class="spinner"></span>Cargando gastos...</div>
@@ -1571,7 +1574,11 @@ async function cargarGastos() {
     'Pasarela de pago': 'Comisión_Pasarela',
     'Comision_Pasarela': 'Comisión_Pasarela',
   };
-  gMes.forEach(g => { if (NORM_CAT[g.Categoria]) g.Categoria = NORM_CAT[g.Categoria]; });
+  gMes.forEach(g => {
+    // Normalizar ID (el header real del sheet puede ser id_gasto, ID_Gasto, ID, etc.)
+    if (!g.ID_Gasto) g.ID_Gasto = g.id_gasto || g.ID || g.id || '';
+    if (NORM_CAT[g.Categoria]) g.Categoria = NORM_CAT[g.Categoria];
+  });
 
   const CATS_MATERIALES = ['Compra_Insumos', 'Compras', 'Materiales'];
   const materiales  = gMes.filter(g => CATS_MATERIALES.includes(g.Categoria));
@@ -1588,10 +1595,10 @@ async function cargarGastos() {
       <td>${g.Descripcion||'—'}</td>
       <td>${cop(g.Valor)}</td>
       <td>${g.Fuente||'Manual'}</td>
-      <td style="white-space:nowrap">${(g.Fuente||'Manual')==='Manual' ? `
+      <td style="white-space:nowrap">${(g.Fuente||'Manual')==='Manual' ? (g.ID_Gasto ? `
         <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;" onclick='editarGasto(${JSON.stringify(g)})'>✏️</button>
-        <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--rojo);" onclick="eliminarGasto('${g.ID_Gasto||g.ID}')">🗑️</button>
-      ` : ''}</td>
+        <button class="btn btn-outline btn-sm" style="padding:2px 7px;font-size:11px;color:var(--rojo);" onclick="eliminarGasto('${g.ID_Gasto}')">🗑️</button>
+      ` : '<span style="font-size:10px;color:#aaa;" title="Sin ID — usa \'Asignar IDs\' para habilitar edición">sin ID</span>') : ''}</td>
     </tr>`;
 
   document.getElementById('gastos-tabla').innerHTML = `
@@ -2097,8 +2104,17 @@ function editarGasto(g) {
   abrirModal('modal-gasto');
 }
 
+async function asignarIdsGastos() {
+  if (!confirm('¿Asignar IDs a todos los gastos manuales que no tienen ID?\n\nEsto es una operación de una sola vez.')) return;
+  try {
+    const r = await enviarScript('asignar_ids_gastos', {});
+    alert('✅ ' + (r.mensaje || 'IDs asignados'));
+    cargarSeccion('gastos');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
 async function eliminarGasto(id) {
-  if (!id) { alert('No se encontró el ID del gasto'); return; }
+  if (!id || id === 'undefined') { alert('No se encontró el ID del gasto'); return; }
   if (!confirm(`¿Eliminar el gasto ${id}? Esta acción no se puede deshacer.`)) return;
   try {
     await enviarScript('eliminar_gasto_manual', { ID: id });
