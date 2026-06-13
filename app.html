@@ -562,12 +562,9 @@
       <div class="section" id="s-gastos">
         <div class="section-header">
           <div class="section-title">Compras y gastos operativos del mes</div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-outline" onclick="asignarIdsGastos()" title="Asigna IDs a los gastos manuales que no tienen ID en el Sheet">🔧 Asignar IDs</button>
-            <button class="btn btn-primary" onclick="nuevoGasto()">
-              <i class="ti ti-plus"></i>Registrar gasto manual
-            </button>
-          </div>
+          <button class="btn btn-primary" onclick="nuevoGasto()">
+            <i class="ti ti-plus"></i>Registrar gasto manual
+          </button>
         </div>
         <div id="gastos-tabla">
           <div class="loading"><span class="spinner"></span>Cargando gastos...</div>
