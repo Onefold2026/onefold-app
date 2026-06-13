@@ -997,7 +997,7 @@ function getMesLabel() {
 
 // ── GOOGLE SHEETS API ─────────────────────────
 async function leerHoja(rango) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${rango}?key=${API_KEY}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${rango}?key=${API_KEY}&_=${Date.now()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Error al leer Google Sheets');
   const data = await res.json();
