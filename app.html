@@ -1126,6 +1126,18 @@ async function cargarDashboard() {
     const waAnio  = filtrarAnio(ventasWA);
     const gAnio   = filtrarAnio(gastos);
 
+    // ── Normalizar categorías (mismas reglas que cargarGastos) ─────────────
+    const NORM_CAT_D = {
+      'Compras': 'Compra_Insumos', 'Materiales': 'Compra_Insumos',
+      'Logistica': 'Logística', 'logistica': 'Logística',
+      'personal/honorarios': 'Personal/Honorarios',
+      'Personal/honorarios': 'Personal/Honorarios',
+      'Pauta': 'Publicidad',
+      'Pasarela de pago': 'Comisión_Pasarela',
+      'Comision_Pasarela': 'Comisión_Pasarela',
+    };
+    [...gMes, ...gAnio].forEach(g => { if (NORM_CAT_D[g.Categoria]) g.Categoria = NORM_CAT_D[g.Categoria]; });
+
     // ── COGS mes ───────────────────────────────────────────────
     let totalCOGS = 0;
     let cogsConCosto = 0;
@@ -1146,12 +1158,15 @@ async function cargarDashboard() {
     });
 
     // ── Totales mes ────────────────────────────────────────────
-    const totalVentas  = [...vMes, ...waMes].reduce((s, r) => s + (parseFloat(r.Total)||0), 0);
-    const totalGastos  = gMes.reduce((s, r) => s + (parseFloat(r.Valor)||0), 0);
-    const totalPedidos = vMes.length + waMes.length;
-    const ticket       = totalPedidos > 0 ? totalVentas / totalPedidos : 0;
-    const utilBruta    = totalVentas - totalCOGS;
-    const utilNeta     = utilBruta - totalGastos;
+    const totalVentas   = [...vMes, ...waMes].reduce((s, r) => s + (parseFloat(r.Total)||0), 0);
+    const CATS_INV_D    = ['Compra_Insumos', 'Compras', 'Materiales'];
+    const totalInsumos  = gMes.filter(g => CATS_INV_D.includes(g.Categoria)).reduce((s,g) => s+(parseFloat(g.Valor)||0), 0);
+    const totalGastosOp = gMes.filter(g => !CATS_INV_D.includes(g.Categoria)).reduce((s,g) => s+(parseFloat(g.Valor)||0), 0);
+    const totalGastos   = gMes.reduce((s, r) => s + (parseFloat(r.Valor)||0), 0); // para % por categoría
+    const totalPedidos  = vMes.length + waMes.length;
+    const ticket        = totalPedidos > 0 ? totalVentas / totalPedidos : 0;
+    const utilBruta     = totalVentas - totalCOGS;
+    const utilNeta      = utilBruta - totalGastosOp; // inventario excluido del P&L operativo
     const margen       = totalVentas > 0 ? ((utilNeta / totalVentas)*100).toFixed(1) : 0;
 
     // ── Desglose gastos por categoría ─────────────────────────
@@ -1172,18 +1187,20 @@ async function cargarDashboard() {
     document.getElementById('m-cogs').textContent                 = cop(totalCOGS);
     document.getElementById('m-cogs-sub').textContent             = cogsEsEstimado ? '⚠ Sin costos configurados' : `${cogsConCosto} productos con costo`;
     document.getElementById('m-util-bruta').textContent           = cop(utilBruta);
-    document.getElementById('m-gastos').textContent               = cop(totalGastos);
+    document.getElementById('m-gastos').textContent               = cop(totalGastosOp);
     document.getElementById('m-util-neta').textContent            = cop(utilNeta);
     document.getElementById('m-ventas-sub').textContent           = getMesLabel();
-    document.getElementById('m-gastos-sub').textContent           = `${gMes.length} registros`;
+    document.getElementById('m-gastos-sub').textContent           = totalInsumos > 0 ? `+ ${cop(totalInsumos)} inventario` : `${gMes.length} registros`;
     document.getElementById('m-margen').textContent               = `Margen neto: ${margen}%`;
     document.getElementById('dash-mes-label').textContent         = getMesLabel();
 
     // ── YTD ───────────────────────────────────────────────────
-    const ytdVentas  = [...vAnio, ...waAnio].reduce((s, r) => s + (parseFloat(r.Total)||0), 0);
-    const ytdGastos  = gAnio.reduce((s, r) => s + (parseFloat(r.Valor)||0), 0);
-    const ytdPedidos = vAnio.length + waAnio.length;
-    const ytdUtil    = ytdVentas - ytdCOGS - ytdGastos;
+    const ytdVentas   = [...vAnio, ...waAnio].reduce((s, r) => s + (parseFloat(r.Total)||0), 0);
+    const ytdInsumos  = gAnio.filter(g => CATS_INV_D.includes(g.Categoria)).reduce((s,g) => s+(parseFloat(g.Valor)||0), 0);
+    const ytdGastosOp = gAnio.filter(g => !CATS_INV_D.includes(g.Categoria)).reduce((s,g) => s+(parseFloat(g.Valor)||0), 0);
+    const ytdGastos   = gAnio.reduce((s, r) => s + (parseFloat(r.Valor)||0), 0);
+    const ytdPedidos  = vAnio.length + waAnio.length;
+    const ytdUtil     = ytdVentas - ytdCOGS - ytdGastosOp; // excluye inventario
     const ytdMargen  = ytdVentas > 0 ? ((ytdUtil / ytdVentas)*100).toFixed(1) : 0;
     const anioActual = mesActual.split('-')[0];
 
@@ -1191,11 +1208,11 @@ async function cargarDashboard() {
     document.getElementById('ytd-pedidos').textContent     = ytdPedidos;
     document.getElementById('ytd-cogs').textContent        = cop(ytdCOGS);
     document.getElementById('ytd-util-bruta').textContent  = cop(ytdVentas - ytdCOGS);
-    document.getElementById('ytd-gastos').textContent      = cop(ytdGastos);
+    document.getElementById('ytd-gastos').textContent      = cop(ytdGastosOp);
     document.getElementById('ytd-util-neta').textContent   = cop(ytdUtil);
     document.getElementById('ytd-ventas-sub').textContent  = `Ene — ${getMesLabel().split(' ')[0]} ${anioActual}`;
     document.getElementById('ytd-pedidos-sub').textContent = `${vAnio.length} Shopify · ${waAnio.length} WhatsApp`;
-    document.getElementById('ytd-gastos-sub').textContent  = `${gAnio.length} registros`;
+    document.getElementById('ytd-gastos-sub').textContent  = ytdInsumos > 0 ? `+ ${cop(ytdInsumos)} inventario` : `${gAnio.length} registros`;
     document.getElementById('ytd-margen').textContent      = `Margen neto: ${ytdMargen}%`;
 
     // ── P&L detallado ─────────────────────────────────────────
@@ -1215,9 +1232,10 @@ async function cargarDashboard() {
       ${plLine('(−) Costo productos (COGS)', -totalCOGS, false)}
       ${cogsEsEstimado ? '<div style="font-size:11px;color:#e09050;padding:4px 0 8px;">⚠ Agrega Costo_Total en la hoja Productos para calcular el COGS real</div>' : ''}
       ${plTotal('= Utilidad bruta', utilBruta, true)}
-      ${plLine('(−) Gastos operativos', -totalGastos)}
+      ${plLine('(−) Gastos operativos', -totalGastosOp)}
       ${plTotal('= Utilidad neta', utilNeta, true)}
       <div style="margin-top:8px;font-size:12px;color:var(--muted);">Margen neto: ${margen}%</div>
+      ${totalInsumos > 0 ? `<div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--beige-b);font-size:12px;"><div style="display:flex;justify-content:space-between;color:var(--muted);"><span>↳ Compra inventario (no afecta P&L)</span><span>${cop(totalInsumos)}</span></div></div>` : ''}
     `;
 
     // ── Gastos por categoría ───────────────────────────────────
@@ -1230,6 +1248,7 @@ async function cargarDashboard() {
       'Producción_Contenido': '#d96e5b',
       'Administrativo': '#6e9898',
       'Materiales': '#98846e',
+      'Compra_Insumos': '#98846e',
     };
     const catHtml = desgloseOrdenado.length === 0
       ? '<div style="color:#999;font-size:13px;text-align:center;padding:20px;">Sin gastos este mes</div>'
