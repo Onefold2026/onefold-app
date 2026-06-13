@@ -812,8 +812,7 @@
           <label class="form-label">Categoría *</label>
           <select class="form-control" id="g-categoria" onchange="toggleCategoriaOtra(this.value)">
             <optgroup label="── Materiales e insumos ──">
-              <option>Compras</option>
-              <option>Materiales</option>
+              <option>Compra_Insumos</option>
             </optgroup>
             <optgroup label="── Gastos operativos ──">
               <option>Publicidad</option>
@@ -1563,6 +1562,8 @@ async function cargarGastos() {
 
   // Normalizar categorías inconsistentes del sheet
   const NORM_CAT = {
+    'Compras':             'Compra_Insumos',
+    'Materiales':          'Compra_Insumos',
     'Logistica': 'Logística', 'logistica': 'Logística',
     'personal/honorarios': 'Personal/Honorarios',
     'Personal/honorarios': 'Personal/Honorarios',
@@ -1572,7 +1573,7 @@ async function cargarGastos() {
   };
   gMes.forEach(g => { if (NORM_CAT[g.Categoria]) g.Categoria = NORM_CAT[g.Categoria]; });
 
-  const CATS_MATERIALES = ['Compras', 'Materiales'];
+  const CATS_MATERIALES = ['Compra_Insumos', 'Compras', 'Materiales'];
   const materiales  = gMes.filter(g => CATS_MATERIALES.includes(g.Categoria));
   const operativos  = gMes.filter(g => !CATS_MATERIALES.includes(g.Categoria));
 
