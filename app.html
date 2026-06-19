@@ -349,12 +349,6 @@
       <div class="nav-item" data-section="pedidos">
         <i class="ti ti-truck"></i>Estado pedidos
       </div>
-      <div class="nav-item" data-section="pedidos-wa">
-        <i class="ti ti-brand-whatsapp"></i>Pedidos WhatsApp
-      </div>
-      <div class="nav-item" data-section="pqr">
-        <i class="ti ti-message-question"></i>PQR WhatsApp
-      </div>
 
       <div class="nav-item" data-section="pedidos-wa">
         <i class="ti ti-brand-whatsapp"></i>Pedidos WhatsApp
@@ -646,32 +640,6 @@
         </div>
       </div>
 
-      <!-- PEDIDOS WHATSAPP -->
-      <div class="section" id="s-pedidos-wa">
-        <div class="section-header">
-          <div class="section-title">Pedidos WhatsApp — pendientes de despacho</div>
-          <button class="btn btn-outline btn-sm" onclick="cargarPedidosWA()">
-            <i class="ti ti-refresh"></i>Actualizar
-          </button>
-        </div>
-        <div id="pedidos-wa-tabla">
-          <div class="loading"><span class="spinner"></span>Cargando pedidos...</div>
-        </div>
-      </div>
-
-      <!-- PQR WHATSAPP -->
-      <div class="section" id="s-pqr">
-        <div class="section-header">
-          <div class="section-title">PQR WhatsApp — casos pendientes</div>
-          <button class="btn btn-outline btn-sm" onclick="cargarPQR()">
-            <i class="ti ti-refresh"></i>Actualizar
-          </button>
-        </div>
-        <div id="pqr-tabla">
-          <div class="loading"><span class="spinner"></span>Cargando PQRs...</div>
-        </div>
-      </div>
-
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -946,97 +914,6 @@
   </div>
 </div>
 
-<!-- Modal: Despachar pedido WhatsApp -->
-<div class="modal-overlay" id="modal-despacho-wa">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Marcar pedido como despachado</div>
-      <button class="modal-close" onclick="cerrarModal('modal-despacho-wa')">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="dwa-id">
-      <input type="hidden" id="dwa-telefono">
-      <div class="form-group">
-        <label class="form-label">Pedido</label>
-        <div id="dwa-resumen" style="padding:9px 12px;border:1px solid var(--beige-b);border-radius:7px;background:#f9f5f1;font-size:12px;color:var(--muted);"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Número de guía *</label>
-          <input type="text" class="form-control" id="dwa-guia" placeholder="Ej: 893012345678">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Transportadora *</label>
-          <select class="form-control" id="dwa-transportadora">
-            <option>EnvíoClick</option>
-            <option>Coordinadora</option>
-            <option>Servientrega</option>
-            <option>Interrapidísimo</option>
-            <option>TCC</option>
-            <option>Otra</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notas</label>
-        <input type="text" class="form-control" id="dwa-notas" placeholder="Opcional">
-      </div>
-      <div class="alert alert-warning" style="margin-top:8px;">
-        <i class="ti ti-info-circle"></i>
-        Cherry enviará automáticamente un WhatsApp al cliente confirmando el despacho.
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('modal-despacho-wa')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-confirmar-despacho" onclick="guardarDespachoWA()">
-        <i class="ti ti-truck"></i>Confirmar despacho
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Responder PQR -->
-<div class="modal-overlay" id="modal-responder-pqr">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Responder PQR</div>
-      <button class="modal-close" onclick="cerrarModal('modal-responder-pqr')">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="pqr-id">
-      <input type="hidden" id="pqr-telefono">
-      <div class="form-group">
-        <label class="form-label">Cliente</label>
-        <div id="pqr-resumen" style="padding:9px 12px;border:1px solid var(--beige-b);border-radius:7px;background:#f9f5f1;font-size:12px;color:var(--muted);"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Motivo del caso</label>
-        <div id="pqr-motivo" style="padding:9px 12px;border:1px solid var(--beige-b);border-radius:7px;background:#fff8e1;font-size:12px;color:var(--texto);"></div>
-      </div>
-      <div class="form-group" id="pqr-historial-wrap" style="display:none;">
-        <label class="form-label">Historial de conversación</label>
-        <div id="pqr-historial" style="padding:10px 12px;border:1px solid var(--beige-b);border-radius:7px;background:#f9f5f1;font-size:11px;color:var(--muted);max-height:140px;overflow-y:auto;white-space:pre-wrap;"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Respuesta para el cliente *</label>
-        <textarea class="form-control" id="pqr-respuesta" rows="4"
-          placeholder="Escribe el mensaje que Cherry le enviará al cliente por WhatsApp..."
-          style="resize:vertical;"></textarea>
-      </div>
-      <div class="alert alert-warning" style="margin-top:8px;">
-        <i class="ti ti-info-circle"></i>
-        Cherry enviará este mensaje al cliente y el caso quedará como Resuelto.
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('modal-responder-pqr')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-enviar-pqr" onclick="guardarRespuestaPQR()">
-        <i class="ti ti-send"></i>Enviar respuesta
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal: Despacho WhatsApp -->
 <div class="modal-overlay" id="modal-despacho-wa">
   <div class="modal">
@@ -1176,8 +1053,6 @@ const TITULOS = {
   productos:   'Productos',
   inventario:  'Inventario',
   pedidos:     'Estado de pedidos',
-  'pedidos-wa': 'Pedidos WhatsApp',
-  pqr:         'PQR WhatsApp',
   gastos:      'Compras y gastos operativos',
   roas:        'ROAS',
   facturacion:  'Facturación',
@@ -1314,8 +1189,6 @@ async function cargarSeccion(seccion) {
       case 'productos':   await cargarProductos(); break;
       case 'inventario':  await cargarInventario(); break;
       case 'pedidos':     await cargarPedidos(); break;
-      case 'pedidos-wa':  await cargarPedidosWA(); break;
-      case 'pqr':         await cargarPQR(); break;
       case 'gastos':      await cargarGastos(); break;
       case 'roas':        await cargarROAS(); break;
       case 'facturacion': await cargarFacturacion(); break;
@@ -2574,230 +2447,6 @@ function calcularTotalWA() {
   document.getElementById('wa-total-display').textContent = cop(total);
 }
 
-// ── PEDIDOS WHATSAPP ──────────────────────────
-async function cargarPedidosWA() {
-  document.getElementById('pedidos-wa-tabla').innerHTML =
-    '<div class="loading"><span class="spinner"></span>Cargando pedidos...</div>';
-  try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ accion: 'get_pedidos_wa' })
-    });
-    const data = await res.json();
-    const pedidos = data.pedidos || data.filas || [];
-
-    if (!pedidos.length) {
-      document.getElementById('pedidos-wa-tabla').innerHTML =
-        '<div class="empty"><i class="ti ti-checks"></i><p>No hay pedidos pendientes de despacho</p></div>';
-      return;
-    }
-
-    document.getElementById('pedidos-wa-tabla').innerHTML = `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">${pedidos.length} pedido(s) pendientes de despacho</div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Pedido</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <th>Productos</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${pedidos.map(p => `
-              <tr>
-                <td><strong>${p.ID_Pedido || '—'}</strong></td>
-                <td>${p.Fecha || '—'}</td>
-                <td>${p.Cliente || '—'}</td>
-                <td>${p.Telefono || '—'}</td>
-                <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.Productos || p.Producto || '—'}</td>
-                <td>${cop(p.Total)}</td>
-                <td><span class="badge badge-orange">${p.Estado_Pedido || 'Pagado'}</span></td>
-                <td>
-                  <button class="btn btn-primary btn-sm"
-                    onclick='abrirDespachoWA(${JSON.stringify(p)})'>
-                    <i class="ti ti-truck"></i>Despachar
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>`;
-  } catch(e) {
-    document.getElementById('pedidos-wa-tabla').innerHTML =
-      `<div class="alert alert-error"><i class="ti ti-alert-circle"></i>Error cargando pedidos: ${e.message}</div>`;
-  }
-}
-
-function abrirDespachoWA(p) {
-  document.getElementById('dwa-id').value        = p.ID_Pedido || '';
-  document.getElementById('dwa-telefono').value  = p.Telefono || '';
-  document.getElementById('dwa-guia').value      = '';
-  document.getElementById('dwa-notas').value     = '';
-  document.getElementById('dwa-resumen').textContent =
-    `${p.ID_Pedido} — ${p.Cliente} — ${cop(p.Total)} — ${p.Productos || p.Producto || ''}`;
-  abrirModal('modal-despacho-wa');
-}
-
-async function guardarDespachoWA() {
-  const id    = document.getElementById('dwa-id').value;
-  const guia  = document.getElementById('dwa-guia').value.trim();
-  if (!id || !guia) { alert('Ingresa el número de guía'); return; }
-
-  const btn = document.getElementById('btn-confirmar-despacho');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Enviando...';
-
-  try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        accion: 'despachar_whatsapp',
-        fila: {
-          ID_Pedido:      id,
-          Numero_Guia:    guia,
-          Transportadora: document.getElementById('dwa-transportadora').value,
-          Notas:          document.getElementById('dwa-notas').value
-        }
-      })
-    });
-    const data = await res.json();
-    if (data.estado !== 'ok') throw new Error(data.mensaje || 'Error del servidor');
-    cerrarModal('modal-despacho-wa');
-    alert(`✅ Pedido ${id} marcado como despachado.\nCherry notificará al cliente por WhatsApp.`);
-    cargarPedidosWA();
-  } catch(e) {
-    alert('Error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-truck"></i>Confirmar despacho';
-  }
-}
-
-// ── PQR WHATSAPP ──────────────────────────────
-async function cargarPQR() {
-  document.getElementById('pqr-tabla').innerHTML =
-    '<div class="loading"><span class="spinner"></span>Cargando PQRs...</div>';
-  try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ accion: 'get_pqr_pendientes' })
-    });
-    const data = await res.json();
-    const pqrs = data.pqrs || data.filas || [];
-
-    if (!pqrs.length) {
-      document.getElementById('pqr-tabla').innerHTML =
-        '<div class="empty"><i class="ti ti-mood-happy"></i><p>No hay PQRs pendientes 🎉</p></div>';
-      return;
-    }
-
-    document.getElementById('pqr-tabla').innerHTML = `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">${pqrs.length} caso(s) pendiente(s)</div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <th>Motivo</th>
-              <th>Estado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${pqrs.map(p => `
-              <tr>
-                <td><strong>${p.ID_PQR || '—'}</strong></td>
-                <td>${p.Fecha || '—'}</td>
-                <td>${p.Cliente || '—'}</td>
-                <td>${p.Telefono || '—'}</td>
-                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                    title="${(p.Motivo||'').replace(/"/g,'&quot;')}">${p.Motivo || '—'}</td>
-                <td><span class="badge badge-orange">${p.Estado || 'Pendiente'}</span></td>
-                <td>
-                  <button class="btn btn-primary btn-sm"
-                    onclick='abrirResponderPQR(${JSON.stringify(p)})'>
-                    <i class="ti ti-message-reply"></i>Responder
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>`;
-  } catch(e) {
-    document.getElementById('pqr-tabla').innerHTML =
-      `<div class="alert alert-error"><i class="ti ti-alert-circle"></i>Error cargando PQRs: ${e.message}</div>`;
-  }
-}
-
-function abrirResponderPQR(p) {
-  document.getElementById('pqr-id').value       = p.ID_PQR || '';
-  document.getElementById('pqr-telefono').value = p.Telefono || '';
-  document.getElementById('pqr-respuesta').value = '';
-  document.getElementById('pqr-resumen').textContent =
-    `${p.ID_PQR} — ${p.Cliente || '—'} (${p.Telefono || '—'})`;
-  document.getElementById('pqr-motivo').textContent = p.Motivo || '—';
-
-  const historialWrap = document.getElementById('pqr-historial-wrap');
-  const historialEl   = document.getElementById('pqr-historial');
-  if (p.Historial) {
-    historialEl.textContent = p.Historial;
-    historialWrap.style.display = 'block';
-  } else {
-    historialWrap.style.display = 'none';
-  }
-
-  abrirModal('modal-responder-pqr');
-}
-
-async function guardarRespuestaPQR() {
-  const id        = document.getElementById('pqr-id').value;
-  const respuesta = document.getElementById('pqr-respuesta').value.trim();
-  if (!id || !respuesta) { alert('Escribe una respuesta para el cliente'); return; }
-
-  const btn = document.getElementById('btn-enviar-pqr');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Enviando...';
-
-  try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        accion: 'resolver_pqr',
-        fila: {
-          ID_PQR:    id,
-          Respuesta: respuesta,
-          Estado:    'Resuelto'
-        }
-      })
-    });
-    const data = await res.json();
-    if (data.estado !== 'ok') throw new Error(data.mensaje || 'Error del servidor');
-    cerrarModal('modal-responder-pqr');
-    alert(`✅ Respuesta enviada.\nCherry le entregará el mensaje al cliente por WhatsApp.`);
-    cargarPQR();
-  } catch(e) {
-    alert('Error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-send"></i>Enviar respuesta';
-  }
-}
-
 // ── SIDEBAR MÓVIL ─────────────────────────────
 function toggleSidebar() {
   const sb  = document.getElementById('sidebar');
@@ -2821,203 +2470,122 @@ async function cargarPedidosWA() {
   document.getElementById('pedidos-wa-tabla').innerHTML =
     '<div class="loading"><span class="spinner"></span>Cargando pedidos...</div>';
   try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ accion: 'get_pedidos_wa' })
-    });
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({accion:'get_pedidos_wa'}) });
     const data = await res.json();
     const pedidos = data.pedidos || [];
     if (pedidos.length === 0) {
-      document.getElementById('pedidos-wa-tabla').innerHTML = `
-        <div class="empty">
-          <i class="ti ti-package-off"></i>
-          <p>No hay pedidos pendientes de despacho</p>
-        </div>`;
+      document.getElementById('pedidos-wa-tabla').innerHTML =
+        '<div class="empty"><i class="ti ti-package-off"></i><p>No hay pedidos pendientes de despacho</p></div>';
       return;
     }
     document.getElementById('pedidos-wa-tabla').innerHTML = `
-      <div class="card">
-        <table>
-          <thead>
+      <div class="card"><table>
+        <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Telef.</th><th>Productos</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          ${pedidos.map(p => `
             <tr>
-              <th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Telef.</th>
-              <th>Productos</th><th>Total</th><th>Estado</th><th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${pedidos.map(p => `
-              <tr>
-                <td><strong>#${p.ID_Pedido}</strong></td>
-                <td>${p.Fecha}</td>
-                <td>${p.Cliente}</td>
-                <td>${p.Telefono || '—'}</td>
-                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                    title="${p.Productos || ''}">${p.Productos || '—'}</td>
-                <td>${cop(p.Total)}</td>
-                <td>${estadoBadge(p.Estado_Pedido || 'Pagado')}</td>
-                <td>
-                  <button class="btn btn-primary btn-sm" onclick='abrirDespachoWA(${JSON.stringify(p)})'>
-                    <i class="ti ti-truck"></i>Despachar
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>`;
+              <td><strong>#${p.ID_Pedido}</strong></td>
+              <td>${p.Fecha}</td><td>${p.Cliente}</td><td>${p.Telefono||'—'}</td>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.Productos||''}">${p.Productos||'—'}</td>
+              <td>${cop(p.Total)}</td>
+              <td>${estadoBadge(p.Estado_Pedido||'Pagado')}</td>
+              <td><button class="btn btn-primary btn-sm" onclick='abrirDespachoWA(${JSON.stringify(p)})'><i class="ti ti-truck"></i>Despachar</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table></div>`;
   } catch(e) {
     document.getElementById('pedidos-wa-tabla').innerHTML =
       `<div class="alert alert-error"><i class="ti ti-alert-circle"></i>Error: ${e.message}</div>`;
   }
 }
-
 function abrirDespachoWA(p) {
   document.getElementById('dwa-id').value       = p.ID_Pedido;
-  document.getElementById('dwa-telefono').value = p.Telefono || '';
+  document.getElementById('dwa-telefono').value = p.Telefono||'';
   document.getElementById('dwa-guia').value     = '';
   document.getElementById('dwa-notas').value    = '';
-  document.getElementById('dwa-info').innerHTML = `
-    <strong>#${p.ID_Pedido}</strong> · ${p.Cliente}
-    <span style="color:var(--muted);margin-left:8px;">${p.Telefono || ''}</span><br>
-    <span style="color:var(--muted);">${p.Productos || ''} — ${cop(p.Total)}</span>
-  `;
+  document.getElementById('dwa-info').innerHTML =
+    `<strong>#${p.ID_Pedido}</strong> · ${p.Cliente} <span style="color:var(--muted);margin-left:8px;">${p.Telefono||''}</span><br>
+     <span style="color:var(--muted);">${p.Productos||''} — ${cop(p.Total)}</span>`;
   abrirModal('modal-despacho-wa');
 }
-
 async function guardarDespachoWA() {
-  const id   = document.getElementById('dwa-id').value;
   const guia = document.getElementById('dwa-guia').value.trim();
   if (!guia) { alert('Ingresa el número de guía'); return; }
   const btn = document.querySelector('#modal-despacho-wa .btn-primary');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
   try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        accion: 'despachar_whatsapp',
-        fila: {
-          ID_Pedido:      id,
-          Numero_Guia:    guia,
-          Transportadora: document.getElementById('dwa-transportadora').value,
-          Notas:          document.getElementById('dwa-notas').value
-        }
-      })
-    });
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({
+      accion:'despachar_whatsapp',
+      fila:{ ID_Pedido:document.getElementById('dwa-id').value,
+             Numero_Guia:guia,
+             Transportadora:document.getElementById('dwa-transportadora').value,
+             Notas:document.getElementById('dwa-notas').value }
+    })});
     const data = await res.json();
-    if (data.estado === 'ok') {
-      cerrarModal('modal-despacho-wa');
-      alert('✅ Pedido despachado. Se notificará al cliente por WhatsApp.');
-      cargarPedidosWA();
-    } else {
-      alert('Error: ' + (data.mensaje || JSON.stringify(data)));
-    }
-  } catch(e) { alert('Error: ' + e.message); }
-  finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-truck"></i>Confirmar despacho';
-  }
+    if (data.estado==='ok') { cerrarModal('modal-despacho-wa'); alert('✅ Pedido despachado. Se notificará al cliente por WhatsApp.'); cargarPedidosWA(); }
+    else alert('Error: '+(data.mensaje||JSON.stringify(data)));
+  } catch(e) { alert('Error: '+e.message); }
+  finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-truck"></i>Confirmar despacho'; }
 }
-
 // ── PQR WHATSAPP ──────────────────────────────
 async function cargarPQR() {
   document.getElementById('pqr-tabla').innerHTML =
     '<div class="loading"><span class="spinner"></span>Cargando PQRs...</div>';
   try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ accion: 'get_pqr_pendientes' })
-    });
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({accion:'get_pqr_pendientes'}) });
     const data = await res.json();
     const pqrs = data.pqr || [];
     if (pqrs.length === 0) {
-      document.getElementById('pqr-tabla').innerHTML = `
-        <div class="empty">
-          <i class="ti ti-message-check"></i>
-          <p>No hay PQRs pendientes — ¡todo bajo control!</p>
-        </div>`;
+      document.getElementById('pqr-tabla').innerHTML =
+        '<div class="empty"><i class="ti ti-message-check"></i><p>No hay PQRs pendientes</p></div>';
       return;
     }
     document.getElementById('pqr-tabla').innerHTML = `
-      <div class="card">
-        <table>
-          <thead>
+      <div class="card"><table>
+        <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Telef.</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          ${pqrs.map(p => `
             <tr>
-              <th>ID</th><th>Fecha</th><th>Cliente</th><th>Telef.</th>
-              <th>Motivo</th><th>Estado</th><th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${pqrs.map(p => `
-              <tr>
-                <td><strong>${p.ID_PQR}</strong></td>
-                <td>${p.Fecha}</td>
-                <td>${p.Cliente}</td>
-                <td>${p.Telefono || '—'}</td>
-                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                    title="${p.Motivo || ''}">${p.Motivo || '—'}</td>
-                <td>
-                  ${p.Estado === 'Resuelto'
-                    ? '<span class="badge badge-green">Resuelto</span>'
-                    : '<span class="badge badge-orange">Pendiente</span>'}
-                </td>
-                <td>
-                  <button class="btn btn-primary btn-sm" onclick='abrirResponderPQR(${JSON.stringify(p)})'>
-                    <i class="ti ti-message-reply"></i>Responder
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>`;
+              <td><strong>${p.ID_PQR}</strong></td>
+              <td>${p.Fecha}</td><td>${p.Cliente}</td><td>${p.Telefono||'—'}</td>
+              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.Motivo||''}">${p.Motivo||'—'}</td>
+              <td>${p.Estado==='Resuelto'?'<span class="badge badge-green">Resuelto</span>':'<span class="badge badge-orange">Pendiente</span>'}</td>
+              <td><button class="btn btn-primary btn-sm" onclick='abrirResponderPQR(${JSON.stringify(p)})'><i class="ti ti-message-reply"></i>Responder</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table></div>`;
   } catch(e) {
     document.getElementById('pqr-tabla').innerHTML =
       `<div class="alert alert-error"><i class="ti ti-alert-circle"></i>Error: ${e.message}</div>`;
   }
 }
-
 function abrirResponderPQR(p) {
   document.getElementById('rpqr-id').value        = p.ID_PQR;
-  document.getElementById('rpqr-telefono').value  = p.Telefono || '';
+  document.getElementById('rpqr-telefono').value  = p.Telefono||'';
   document.getElementById('rpqr-respuesta').value = '';
-  document.getElementById('rpqr-motivo').textContent    = p.Motivo || '—';
-  document.getElementById('rpqr-historial').textContent = p.Historial || 'Sin historial';
+  document.getElementById('rpqr-motivo').textContent    = p.Motivo||'—';
+  document.getElementById('rpqr-historial').textContent = p.Historial||'Sin historial';
   document.getElementById('rpqr-estado').value = 'Resuelto';
   abrirModal('modal-responder-pqr');
 }
-
 async function guardarRespuestaPQR() {
-  const id        = document.getElementById('rpqr-id').value;
   const respuesta = document.getElementById('rpqr-respuesta').value.trim();
-  const estado    = document.getElementById('rpqr-estado').value;
   if (!respuesta) { alert('Escribe la respuesta al cliente'); return; }
   const btn = document.querySelector('#modal-responder-pqr .btn-primary');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
   try {
-    const res  = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        accion: 'resolver_pqr',
-        fila: { ID_PQR: id, Respuesta: respuesta, Estado: estado }
-      })
-    });
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({
+      accion:'resolver_pqr',
+      fila:{ ID_PQR:document.getElementById('rpqr-id').value,
+             Respuesta:respuesta,
+             Estado:document.getElementById('rpqr-estado').value }
+    })});
     const data = await res.json();
-    if (data.estado === 'ok') {
-      cerrarModal('modal-responder-pqr');
-      alert('✅ Respuesta enviada al cliente por WhatsApp.');
-      cargarPQR();
-    } else {
-      alert('Error: ' + (data.mensaje || JSON.stringify(data)));
-    }
-  } catch(e) { alert('Error: ' + e.message); }
-  finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-send"></i>Enviar respuesta';
-  }
+    if (data.estado==='ok') { cerrarModal('modal-responder-pqr'); alert('✅ Respuesta enviada al cliente por WhatsApp.'); cargarPQR(); }
+    else alert('Error: '+(data.mensaje||JSON.stringify(data)));
+  } catch(e) { alert('Error: '+e.message); }
+  finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i>Enviar respuesta'; }
 }
-
 // ── INIT ──────────────────────────────────────
 cargarDashboard();
 </script>
