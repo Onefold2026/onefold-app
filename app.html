@@ -923,33 +923,16 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="dwa-id">
-      <input type="hidden" id="dwa-telefono">
       <div id="dwa-info" style="background:#fdf8f4;border:1px solid var(--beige-b);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--texto);"></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Número de guía *</label>
-          <input type="text" class="form-control" id="dwa-guia" placeholder="Ej: 12345678">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Transportadora *</label>
-          <select class="form-control" id="dwa-transportadora">
-            <option>EnvíoClick</option>
-            <option>Coordinadora</option>
-            <option>Servientrega</option>
-            <option>Interrapidísimo</option>
-            <option>TCC</option>
-            <option>Otra</option>
-          </select>
-        </div>
-      </div>
       <div class="form-group">
         <label class="form-label">Notas (opcional)</label>
         <input type="text" class="form-control" id="dwa-notas" placeholder="Ej: Entregar en portería">
       </div>
       <div class="alert alert-warning" style="margin-top:8px;">
         <i class="ti ti-brand-whatsapp"></i>
-        Se enviará notificación automática al cliente por WhatsApp con la guía.
+        Cherry creará la guía automáticamente en EnvíoClick y enviará el PDF al cliente por WhatsApp.
       </div>
+      <div id="dwa-resultado" style="display:none;margin-top:12px;padding:12px;background:#f0faf0;border:1px solid #b2dfb2;border-radius:8px;font-size:13px;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="cerrarModal('modal-despacho-wa')">Cancelar</button>
@@ -2499,33 +2482,44 @@ async function cargarPedidosWA() {
   }
 }
 function abrirDespachoWA(p) {
-  document.getElementById('dwa-id').value       = p.ID_Pedido;
-  document.getElementById('dwa-telefono').value = p.Telefono||'';
-  document.getElementById('dwa-guia').value     = '';
-  document.getElementById('dwa-notas').value    = '';
+  document.getElementById('dwa-id').value    = p.ID_Pedido;
+  document.getElementById('dwa-notas').value = '';
+  document.getElementById('dwa-resultado').style.display = 'none';
   document.getElementById('dwa-info').innerHTML =
     `<strong>#${p.ID_Pedido}</strong> · ${p.Cliente} <span style="color:var(--muted);margin-left:8px;">${p.Telefono||''}</span><br>
-     <span style="color:var(--muted);">${p.Productos||''} — ${cop(p.Total)}</span>`;
+     <span style="color:var(--muted);">${p.Productos||''} — ${cop(p.Total)}</span><br>
+     <span style="color:var(--muted);">${p.Direccion||''} · ${p.Ciudad||''}</span>`;
+  const btn = document.querySelector('#modal-despacho-wa .btn-primary');
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-truck"></i>Generar guía y despachar';
   abrirModal('modal-despacho-wa');
 }
 async function guardarDespachoWA() {
-  const guia = document.getElementById('dwa-guia').value.trim();
-  if (!guia) { alert('Ingresa el número de guía'); return; }
   const btn = document.querySelector('#modal-despacho-wa .btn-primary');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Generando guía en EnvíoClick...';
   try {
     const res  = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({
       accion:'despachar_whatsapp',
-      fila:{ ID_Pedido:document.getElementById('dwa-id').value,
-             Numero_Guia:guia,
-             Transportadora:document.getElementById('dwa-transportadora').value,
-             Notas:document.getElementById('dwa-notas').value }
+      fila:{ ID_Pedido: document.getElementById('dwa-id').value,
+             Notas:     document.getElementById('dwa-notas').value }
     })});
     const data = await res.json();
-    if (data.estado==='ok') { cerrarModal('modal-despacho-wa'); alert('✅ Pedido despachado. Se notificará al cliente por WhatsApp.'); cargarPedidosWA(); }
-    else alert('Error: '+(data.mensaje||JSON.stringify(data)));
-  } catch(e) { alert('Error: '+e.message); }
-  finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-truck"></i>Confirmar despacho'; }
+    if (data.estado==='ok') {
+      const resultado = document.getElementById('dwa-resultado');
+      resultado.style.display = 'block';
+      resultado.innerHTML =
+        `✅ <strong>Guía generada:</strong> ${data.guia||''} (${data.carrier||'COORDINADORA'})<br>
+         PDF enviado al cliente por WhatsApp.
+         ${data.pdf ? `<a href="${data.pdf}" target="_blank" style="margin-left:8px;color:var(--primary);">Ver PDF</a>` : ''}`;
+      btn.innerHTML = '<i class="ti ti-check"></i>Despachado';
+      cargarPedidosWA();
+    } else {
+      alert('Error: '+(data.mensaje||data.error||JSON.stringify(data)));
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-truck"></i>Generar guía y despachar';
+    }
+  } catch(e) {
+    alert('Error: '+e.message);
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-truck"></i>Generar guía y despachar';
+  }
 }
 // ── PQR WHATSAPP ──────────────────────────────
 async function cargarPQR() {
