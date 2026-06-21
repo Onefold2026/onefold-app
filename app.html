@@ -663,9 +663,36 @@
           <input type="email" class="form-control" id="wa-email" placeholder="correo@ejemplo.com">
         </div>
         <div class="form-group">
-          <label class="form-label">Ciudad</label>
-          <input type="text" class="form-control" id="wa-ciudad">
+          <label class="form-label">Cédula / CC</label>
+          <input type="text" class="form-control" id="wa-cedula" placeholder="1234567890">
         </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ciudad *</label>
+          <input type="text" class="form-control" id="wa-ciudad" placeholder="Ej: Medellín">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Departamento *</label>
+          <input type="text" class="form-control" id="wa-departamento" placeholder="Ej: Antioquia">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-label">Dirección *</label>
+          <input type="text" class="form-control" id="wa-direccion" placeholder="Cl 57 # 68c 65">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Barrio</label>
+          <input type="text" class="form-control" id="wa-barrio" placeholder="Nombre del barrio">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Peso paquete (kg)</label>
+          <input type="number" class="form-control" id="wa-peso" placeholder="1" step="0.1" min="0.1" value="1">
+        </div>
+        <div class="form-group"></div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -747,8 +774,18 @@
       </div>
       <div class="form-row">
         <div class="form-group">
+          <label class="form-label">Cédula / CC</label>
+          <input type="text" class="form-control" id="ewa-cedula">
+        </div>
+        <div class="form-group">
           <label class="form-label">Ciudad</label>
           <input type="text" class="form-control" id="ewa-ciudad">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <input type="text" class="form-control" id="ewa-departamento">
         </div>
         <div class="form-group">
           <label class="form-label">Canal</label>
@@ -760,6 +797,23 @@
             <option>Otro</option>
           </select>
         </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-label">Dirección</label>
+          <input type="text" class="form-control" id="ewa-direccion">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Barrio</label>
+          <input type="text" class="form-control" id="ewa-barrio">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Peso paquete (kg)</label>
+          <input type="number" class="form-control" id="ewa-peso" step="0.1" min="0.1">
+        </div>
+        <div class="form-group"></div>
       </div>
       <div class="form-group">
         <label class="form-label">Productos *</label>
@@ -888,43 +942,101 @@
   </div>
 </div>
 
-<!-- Modal: Guía de envío -->
-<div class="modal-overlay" id="modal-guia">
-  <div class="modal">
+<!-- Modal: Detalle de pedido -->
+<div class="modal-overlay" id="modal-detalle-pedido">
+  <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <div class="modal-title">Registrar guía de envío</div>
+      <div class="modal-title" id="dp-titulo">Detalle del pedido</div>
+      <button class="modal-close" onclick="cerrarModal('modal-detalle-pedido')">✕</button>
+    </div>
+    <div class="modal-body" id="dp-cuerpo" style="padding:0"></div>
+    <div class="modal-footer" id="dp-footer"></div>
+  </div>
+</div>
+
+<!-- Modal: Despachar pedido (EnvíoClick + manual) -->
+<div class="modal-overlay" id="modal-guia">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="gu-titulo">Despachar pedido</div>
       <button class="modal-close" onclick="cerrarModal('modal-guia')">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">ID Pedido *</label>
-        <input type="text" class="form-control" id="gu-pedido" placeholder="Ej: 10122">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Número de guía *</label>
-          <input type="text" class="form-control" id="gu-numero">
+    <!-- Fase 1: Inicio -->
+    <div id="gu-fase-1">
+      <div class="modal-body">
+        <input type="hidden" id="gu-pedido">
+        <div id="gu-resumen-destino" style="background:#faf7f4;border:1px solid var(--beige-b);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.6"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Peso paquete (kg) *</label>
+            <input type="number" class="form-control" id="gu-peso" value="0.3" step="0.1" min="0.1">
+          </div>
+          <div class="form-group" style="align-self:flex-end">
+            <button class="btn btn-primary" style="width:100%" onclick="cotizarConEnvioClick()">
+              🚀 Cotizar con EnvíoClick
+            </button>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0">── o registrar guía manualmente ──</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Número de guía</label>
+            <input type="text" class="form-control" id="gu-numero" placeholder="Ej: 900123456">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Transportadora</label>
+            <select class="form-control" id="gu-transportadora">
+              <option value="">Seleccionar...</option>
+              <option>Coordinadora</option>
+              <option>Servientrega</option>
+              <option>Interrapidísimo</option>
+              <option>TCC</option>
+              <option>Deprisa</option>
+              <option>EnvíoClick</option>
+              <option>Otra</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Transportadora *</label>
-          <select class="form-control" id="gu-transportadora">
-            <option>EnvíoClick</option>
-            <option>Coordinadora</option>
-            <option>Servientrega</option>
-            <option>Interrapidísimo</option>
-            <option>TCC</option>
-            <option>Otra</option>
-          </select>
+          <label class="form-label">Notas</label>
+          <input type="text" class="form-control" id="gu-notas">
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Notas</label>
-        <input type="text" class="form-control" id="gu-notas">
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-guia')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarGuia()">Guardar manual</button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('modal-guia')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarGuia()">Guardar guía</button>
+    <!-- Fase 2: Selección de transportadora -->
+    <div id="gu-fase-2" style="display:none">
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Selecciona la transportadora:</p>
+        <div id="gu-lista-rates" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--beige-b)">
+          <label style="font-size:12px;color:var(--muted)">Fecha de recolección</label>
+          <input type="date" class="form-control" id="gu-fecha-recol" style="margin-top:4px">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="volverFase1Guia()">← Volver</button>
+        <button class="btn btn-primary" id="gu-btn-generar" onclick="generarGuiaEnvioClick()">Generar guía</button>
+      </div>
+    </div>
+    <!-- Fase 3: Guía generada -->
+    <div id="gu-fase-3" style="display:none">
+      <div class="modal-body" style="text-align:center;padding:32px 24px">
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px">¡Guía generada!</div>
+        <div style="font-size:24px;font-weight:700;color:var(--tierra);margin-bottom:4px" id="gu-resultado-tracker"></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="gu-resultado-carrier"></div>
+        <div id="gu-btns-pdf" style="display:none;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="imprimirGuiaPDF()">🖨️ Imprimir etiqueta</button>
+          <a id="gu-link-pdf" href="#" target="_blank" class="btn btn-outline">📄 Abrir PDF</a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="cerrarModal('modal-guia');cargarSeccion('pedidos')">Cerrar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1070,6 +1182,12 @@ function estadoBadge(estado) {
 
 // ── CARGAR SECCIONES ──────────────────────────
 async function cargarSeccion(seccion) {
+  const contenedores = {
+    dashboard: 'dashboard-content', ventas: 'ventas-tabla', canales: 'canales-tabla',
+    productos: 'productos-tabla',   inventario: 'inventario-tabla',
+    pedidos: 'pedidos-tabla',       gastos: 'gastos-tabla',
+    roas: 'roas-content',           facturacion: 'facturacion-tabla'
+  };
   try {
     switch(seccion) {
       case 'dashboard':   await cargarDashboard(); break;
@@ -1084,6 +1202,10 @@ async function cargarSeccion(seccion) {
     }
   } catch(e) {
     console.error(e);
+    const el = contenedores[seccion] ? document.getElementById(contenedores[seccion]) : null;
+    if (el) el.innerHTML = `<div style="padding:24px;color:#c0392b;background:#fdf0f0;border-radius:8px;margin:16px">
+      ⚠️ Error al cargar datos: <strong>${e.message}</strong>
+    </div>`;
   }
 }
 
@@ -1092,7 +1214,7 @@ async function cargarDashboard() {
   try {
     const [ventas, ventasWA, gastos, productosRaw] = await Promise.all([
       leerHoja('Ventas_Shopify!A:V'),
-      leerHoja('Ventas_WhatsApp!A:S'),
+      leerHoja('Ventas_WhatsApp!A:Z'),
       leerHoja('Gastos_Operativos!A:J'),
       leerHoja('Productos!A:AD')
     ]);
@@ -1304,7 +1426,7 @@ async function cargarDashboard() {
 async function cargarVentas() {
   const [ventas, ventasWA] = await Promise.all([
     leerHoja('Ventas_Shopify!A:V'),
-    leerHoja('Ventas_WhatsApp!A:S')
+    leerHoja('Ventas_WhatsApp!A:Z')
   ]);
   const soloPagados = v => { const e = (v.Estado_Pedido||'').toLowerCase(); return e.includes('pagado') || e.includes('paid'); };
   const vMes  = filtrarMes(ventas).filter(soloPagados);
@@ -1385,7 +1507,7 @@ async function cargarVentas() {
 async function cargarCanales() {
   const [ventas, ventasWA] = await Promise.all([
     leerHoja('Ventas_Shopify!A:V'),
-    leerHoja('Ventas_WhatsApp!A:S')
+    leerHoja('Ventas_WhatsApp!A:Z')
   ]);
   const soloPagados = v => { const e = (v.Estado_Pedido||'').toLowerCase(); return e.includes('pagado') || e.includes('paid'); };
   const vMes  = filtrarMes(ventas).filter(soloPagados);
@@ -1562,25 +1684,213 @@ async function guardarEntradaStock() {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
+// ── DETALLE PEDIDO ───────────────────────────
+let _pedidosMap = {};
+
+function abrirDetallePedido(idPedido) {
+  const p = _pedidosMap[idPedido];
+  if (!p) return;
+
+  const desp = !!(p.Numero_Guia || '').trim() ||
+    (p.Estado_Pedido || '').toLowerCase().includes('despach');
+
+  document.getElementById('dp-titulo').textContent = `Pedido ${p.ID_Pedido} — ${p.Cliente}`;
+
+  document.getElementById('dp-cuerpo').innerHTML = `
+    <div style="padding:16px 20px;border-bottom:1px solid var(--beige-b);background:#faf7f4;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">CLIENTE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px;">
+        <div><span style="color:var(--muted)">Nombre:</span> <strong>${p.Cliente || '—'}</strong></div>
+        <div><span style="color:var(--muted)">Cédula:</span> ${p.Cedula || '—'}</div>
+        <div><span style="color:var(--muted)">Teléfono:</span> ${p.Telefono ? `<a href="https://wa.me/57${(p.Telefono||'').replace(/\D/g,'')}" target="_blank" style="color:var(--tierra)">📱 ${p.Telefono}</a>` : '—'}</div>
+        <div><span style="color:var(--muted)">Email:</span> ${p.Email || '—'}</div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;border-bottom:1px solid var(--beige-b);">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">DIRECCIÓN DE ENVÍO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px;">
+        <div style="grid-column:1/-1"><span style="color:var(--muted)">Dirección:</span> <strong>${p.Direccion || '—'}</strong>${p.Barrio ? ` — ${p.Barrio}` : ''}</div>
+        <div><span style="color:var(--muted)">Ciudad:</span> ${p.Ciudad || '—'}</div>
+        <div><span style="color:var(--muted)">Departamento:</span> ${p.Departamento || '—'}</div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;border-bottom:1px solid var(--beige-b);">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">PEDIDO</div>
+      <div style="font-size:13px;margin-bottom:6px;">
+        <span style="color:var(--muted)">Productos:</span><br>
+        <strong>${(p.Productos || p.Producto || '—').split(' | ').join('<br>')}</strong>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px;margin-top:8px;">
+        <div><span style="color:var(--muted)">Fecha:</span> ${p.Fecha || '—'}</div>
+        <div><span style="color:var(--muted)">Total:</span> <strong>${cop(p.Total)}</strong></div>
+        <div><span style="color:var(--muted)">Canal:</span> ${p.Canal_Atribucion || '—'}</div>
+        <div><span style="color:var(--muted)">Pago:</span> ${p.Metodo_Pago || p.Pasarela || '—'}</div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">DESPACHO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px;">
+        <div><span style="color:var(--muted)">Estado:</span> ${estadoBadge(p.Estado_Pedido || p.Estado || '—')}</div>
+        <div><span style="color:var(--muted)">Guía:</span> ${p.Numero_Guia || '—'}</div>
+        <div><span style="color:var(--muted)">Transportadora:</span> ${p.Transportadora || '—'}</div>
+        ${p.Notas ? `<div style="grid-column:1/-1"><span style="color:var(--muted)">Notas:</span> ${p.Notas}</div>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('dp-footer').innerHTML = `
+    <button class="btn btn-outline" onclick="cerrarModal('modal-detalle-pedido')">Cerrar</button>
+    <button class="btn btn-outline" onclick="cerrarModal('modal-detalle-pedido');editarVentaWA(${JSON.stringify(p).replace(/"/g,'&quot;')})">✏️ Editar</button>
+    ${!desp ? `<button class="btn btn-primary" onclick="cerrarModal('modal-detalle-pedido');abrirGuiaPedido('${p.ID_Pedido}')">📦 Despachar</button>` : ''}`;
+
+  abrirModal('modal-detalle-pedido');
+}
+
 // ── PEDIDOS ───────────────────────────────────
 async function cargarPedidos() {
-  const ventas = await leerHoja('Ventas_Shopify!A:V');
-  const vMes   = filtrarMes(ventas);
+  const [ventasWA, ventasShopify] = await Promise.all([
+    leerHoja('Ventas_WhatsApp!A:Z'),
+    leerHoja('Ventas_Shopify!A:V')
+  ]);
+
+  // Mapa global WA para modal de detalle
+  _pedidosMap = {};
+  ventasWA.forEach(p => { _pedidosMap[p.ID_Pedido] = p; });
+
+  const esDespachado = p => {
+    const est = (p.Estado_Pedido || p.Estado || '').toLowerCase();
+    return est.includes('despach') || !!(p.Numero_Guia || '').trim();
+  };
+
+  const waPendientes  = ventasWA.filter(p =>
+    !esDespachado(p) && !(p.Estado_Pedido || '').toLowerCase().includes('cancelad'));
+  const waDespachados = ventasWA.filter(esDespachado);
+  const shopifyTodos  = [...ventasShopify].reverse();
+
+  const MAX_WA_PEND = 5;
+  const MAX_WA_DESP = 3;
+  const MAX_SHOP    = 5;
+
+  // Genera filas WA pendientes
+  const filasWAPend = waPendientes.length === 0
+    ? '<tr><td colspan="8" style="text-align:center;color:#999;padding:20px">✅ Todos los pedidos de WhatsApp están despachados</td></tr>'
+    : waPendientes.map((p, i) => {
+        const oculta = i >= MAX_WA_PEND;
+        return `<tr style="cursor:pointer${oculta ? ';display:none' : ''}" class="${oculta ? 'fila-wa-pend-oculta' : ''}"
+            onclick="abrirDetallePedido('${p.ID_Pedido}')">
+          <td>#${p.ID_Pedido}</td><td>${p.Fecha||'—'}</td>
+          <td><strong>${p.Cliente||'—'}</strong></td><td>${p.Telefono||'—'}</td>
+          <td>${p.Ciudad||'—'}</td>
+          <td style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.Productos||'—'}</td>
+          <td>${cop(p.Total)}</td>
+          <td onclick="event.stopPropagation()">
+            <button class="btn btn-primary btn-sm" style="font-size:11px;padding:3px 10px;white-space:nowrap"
+              onclick="abrirGuiaPedido('${p.ID_Pedido}')">📦 Despachar</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+  // Genera filas WA despachados
+  const filasWADesp = waDespachados.length === 0
+    ? '<tr><td colspan="8" style="text-align:center;color:#999;padding:16px">Sin pedidos despachados aún</td></tr>'
+    : waDespachados.map((p, i) => {
+        const oculta = i >= MAX_WA_DESP;
+        return `<tr style="cursor:pointer${oculta ? ';display:none' : ''}" class="${oculta ? 'fila-wa-desp-oculta' : ''}"
+            onclick="abrirDetallePedido('${p.ID_Pedido}')">
+          <td>#${p.ID_Pedido}</td><td>${p.Fecha||'—'}</td><td>${p.Cliente||'—'}</td>
+          <td>${p.Telefono||'—'}</td><td>${p.Ciudad||'—'}</td>
+          <td style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.Productos||'—'}</td>
+          <td>${cop(p.Total)}</td>
+          <td>
+            <span class="badge badge-green" style="font-size:10px">Despachado</span>
+            ${(p.Numero_Guia||'').trim() ? '<div style="font-size:10px;color:var(--muted)">'+p.Numero_Guia+'</div>' : ''}
+          </td>
+        </tr>`;
+      }).join('');
+
+  // Genera filas Shopify
+  const filasShop = shopifyTodos.length === 0
+    ? '<tr><td colspan="7" style="text-align:center;color:#999;padding:16px">Sin pedidos Shopify</td></tr>'
+    : shopifyTodos.map((p, i) => {
+        const oculta = i >= MAX_SHOP;
+        return `<tr style="${oculta ? 'display:none' : ''}" class="${oculta ? 'fila-shop-oculta' : ''}">
+          <td>#${p.ID_Pedido}</td><td>${p.Fecha||'—'}</td>
+          <td>${p.Cliente||'—'}</td><td>${p.Ciudad||'—'}</td>
+          <td>${cop(p.Total)}</td>
+          <td>${estadoBadge(p.Estado_Pedido||'—')}</td>
+          <td>${(p.Numero_Guia||'').trim()
+            ? '<span style="font-size:11px">'+p.Numero_Guia+'</span>'
+            : '<span style="color:#ccc">—</span>'}</td>
+        </tr>`;
+      }).join('');
+
   document.getElementById('pedidos-tabla').innerHTML = `
-    <div class="card">
+
+    <!-- WhatsApp: Por despachar -->
+    <div class="card" style="margin-bottom:16px;border-top:3px solid #25D366;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title">
+          📱 WhatsApp — Por despachar
+          <span style="font-weight:400;font-size:13px;color:var(--muted);margin-left:8px">${waPendientes.length} pedido${waPendientes.length!==1?'s':''}</span>
+        </div>
+        ${waPendientes.length > MAX_WA_PEND
+          ? '<button class="btn btn-outline btn-sm" id="btn-wa-pend" onclick="toggleFilas(\'fila-wa-pend-oculta\',\'btn-wa-pend\','+waPendientes.length+')">Ver todos ('+waPendientes.length+')</button>'
+          : ''}
+      </div>
       <table>
-        <thead><tr><th>Pedido</th><th>Cliente</th><th>Estado</th></tr></thead>
-        <tbody>
-          ${vMes.map(p => `
-            <tr>
-              <td>#${p.ID_Pedido}</td>
-              <td>${p.Cliente}</td>
-              <td>${estadoBadge(p.Estado_Pedido)}</td>
-            </tr>
-          `).join('') || '<tr><td colspan="3" style="text-align:center;color:#999;padding:20px">Sin pedidos este mes</td></tr>'}
-        </tbody>
+        <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Ciudad</th><th>Producto</th><th>Total</th><th></th></tr></thead>
+        <tbody>${filasWAPend}</tbody>
+      </table>
+    </div>
+
+    <!-- WhatsApp: Despachados -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="color:var(--muted)">
+          📱 WhatsApp — Despachados
+          <span style="font-weight:400;font-size:13px;margin-left:8px">${waDespachados.length}</span>
+        </div>
+        ${waDespachados.length > MAX_WA_DESP
+          ? '<button class="btn btn-outline btn-sm" id="btn-wa-desp" onclick="toggleFilas(\'fila-wa-desp-oculta\',\'btn-wa-desp\','+waDespachados.length+')">Ver todos ('+waDespachados.length+')</button>'
+          : ''}
+      </div>
+      <table>
+        <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Ciudad</th><th>Producto</th><th>Total</th><th>Guía</th></tr></thead>
+        <tbody>${filasWADesp}</tbody>
+      </table>
+    </div>
+
+    <!-- Shopify -->
+    <div class="card" style="border-top:3px solid #96bf48;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="font-size:14px;">
+          🛍️ Shopify — Últimos pedidos
+          <span style="font-weight:400;font-size:13px;color:var(--muted);margin-left:8px">${shopifyTodos.length} total</span>
+        </div>
+        ${shopifyTodos.length > MAX_SHOP
+          ? '<button class="btn btn-outline btn-sm" id="btn-shop" onclick="toggleFilas(\'fila-shop-oculta\',\'btn-shop\','+shopifyTodos.length+')">Ver todos ('+shopifyTodos.length+')</button>'
+          : ''}
+      </div>
+      <table>
+        <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Ciudad</th><th>Total</th><th>Estado</th><th>Guía</th></tr></thead>
+        <tbody>${filasShop}</tbody>
       </table>
     </div>`;
+}
+
+function toggleFilas(clase, btnId, total) {
+  const filas = document.querySelectorAll('.' + clase);
+  const btn   = document.getElementById(btnId);
+  const mostrar = filas[0] && filas[0].style.display === 'none';
+  filas.forEach(f => f.style.display = mostrar ? '' : 'none');
+  if (btn) btn.textContent = mostrar ? 'Colapsar' : 'Ver todos (' + total + ')';
+}
+
+function toggleDespachados(total) {
+  const ocultas = document.querySelectorAll('.fila-desp-oculta');
+  const btn = document.getElementById('btn-ver-desp');
+  const mostrar = ocultas[0]?.style.display === 'none';
+  ocultas.forEach(f => f.style.display = mostrar ? '' : 'none');
+  if (btn) btn.textContent = mostrar ? 'Colapsar' : 'Ver todos (' + total + ')';
 }
 
 // ── GASTOS ────────────────────────────────────
@@ -1897,7 +2207,12 @@ async function guardarVentaWA() {
       Cliente:          cliente,
       Email:            document.getElementById('wa-email').value,
       Telefono:         document.getElementById('wa-telefono').value,
+      Cedula:           document.getElementById('wa-cedula').value,
       Ciudad:           document.getElementById('wa-ciudad').value,
+      Departamento:     document.getElementById('wa-departamento').value,
+      Direccion:        document.getElementById('wa-direccion').value,
+      Barrio:           document.getElementById('wa-barrio').value,
+      Peso_Paquete:     document.getElementById('wa-peso').value,
       items:            items,
       Total:            total,
       Descuento:        parseFloat(document.getElementById('wa-descuento').value) || 0,
@@ -1975,14 +2290,19 @@ function calcularTotalEwa() {
 }
 
 async function editarVentaWA(p) {
-  document.getElementById('ewa-id').value        = p.ID_Pedido || '';
-  document.getElementById('ewa-fecha').value     = fechaToInput(p.Fecha);
-  document.getElementById('ewa-cliente').value   = p.Cliente || '';
-  document.getElementById('ewa-email').value     = p.Email || p.email || '';
-  document.getElementById('ewa-telefono').value  = p.Telefono || '';
-  document.getElementById('ewa-ciudad').value    = p.Ciudad || '';
-  document.getElementById('ewa-total').value     = p.Total || '';
-  document.getElementById('ewa-notas').value     = p.Notas || '';
+  document.getElementById('ewa-id').value           = p.ID_Pedido || '';
+  document.getElementById('ewa-fecha').value        = fechaToInput(p.Fecha);
+  document.getElementById('ewa-cliente').value      = p.Cliente || '';
+  document.getElementById('ewa-email').value        = p.Email || p.email || '';
+  document.getElementById('ewa-telefono').value     = p.Telefono || '';
+  document.getElementById('ewa-cedula').value       = p.Cedula || '';
+  document.getElementById('ewa-ciudad').value       = p.Ciudad || '';
+  document.getElementById('ewa-departamento').value = p.Departamento || '';
+  document.getElementById('ewa-direccion').value    = p.Direccion || '';
+  document.getElementById('ewa-barrio').value       = p.Barrio || '';
+  document.getElementById('ewa-peso').value         = p.Peso_Paquete || '1';
+  document.getElementById('ewa-total').value        = p.Total || '';
+  document.getElementById('ewa-notas').value        = p.Notas || '';
 
   const estadoSel = document.getElementById('ewa-estado');
   const est = p.Estado_Pedido || p.Estado || 'Pagado';
@@ -2074,7 +2394,12 @@ async function guardarEdicionWA() {
       Cliente:          cliente,
       Email:            document.getElementById('ewa-email').value,
       Telefono:         document.getElementById('ewa-telefono').value,
+      Cedula:           document.getElementById('ewa-cedula').value,
       Ciudad:           document.getElementById('ewa-ciudad').value,
+      Departamento:     document.getElementById('ewa-departamento').value,
+      Direccion:        document.getElementById('ewa-direccion').value,
+      Barrio:           document.getElementById('ewa-barrio').value,
+      Peso_Paquete:     document.getElementById('ewa-peso').value,
       Total:            total,
       Productos:        productosTexto,
       Cantidades:       cantidadesTexto,
@@ -2183,16 +2508,176 @@ async function guardarGasto() {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
+// ── DESPACHO / ENVÍOCLICK ───────────────────────────────────
+let _guiaPedido     = null;   // objeto pedido completo
+let _guiaRateSelect = null;   // { idRate, carrier, flete, minimumInsurance } seleccionado
+let _guiaDane       = null;   // daneCode del destino
+let _guiaPDFUrl     = null;   // URL del PDF de la etiqueta
+
+function imprimirGuiaPDF() {
+  if (!_guiaPDFUrl) return;
+  const win = window.open(_guiaPDFUrl, '_blank', 'width=900,height=700');
+  if (win) {
+    win.addEventListener('load', () => {
+      setTimeout(() => { try { win.print(); } catch(e) {} }, 800);
+    });
+  }
+}
+
 function abrirGuiaPedido(idPedido) {
-  document.getElementById('gu-pedido').value = idPedido;
-  document.getElementById('gu-numero').value = '';
-  document.getElementById('gu-notas').value  = '';
+  _guiaPedido     = _pedidosMap ? _pedidosMap[idPedido] : null;
+  _guiaRateSelect = null;
+  _guiaDane       = null;
+
+  // Reiniciar fases
+  document.getElementById('gu-fase-1').style.display = '';
+  document.getElementById('gu-fase-2').style.display = 'none';
+  document.getElementById('gu-fase-3').style.display = 'none';
+
+  document.getElementById('gu-pedido').value  = idPedido;
+  document.getElementById('gu-numero').value  = '';
+  document.getElementById('gu-notas').value   = '';
+  document.getElementById('gu-titulo').textContent = 'Despachar pedido #' + idPedido;
+
+  // Rellenar resumen de destino
+  const div = document.getElementById('gu-resumen-destino');
+  if (_guiaPedido) {
+    const p = _guiaPedido;
+    const peso = p.Peso_Paquete || '—';
+    document.getElementById('gu-peso').value = peso && peso !== '—' ? peso : '0.3';
+    div.innerHTML = `
+      <b>${p.Cliente || 'Sin nombre'}</b><br>
+      📍 ${[p.Direccion, p.Barrio, p.Ciudad, p.Departamento].filter(Boolean).join(', ') || 'Sin dirección'}<br>
+      📦 Pedido: ${p.Productos || p.Producto || '—'} · <b>$${parseInt(p.Total||0).toLocaleString('es-CO')}</b>`;
+  } else {
+    div.innerHTML = `<span style="color:var(--muted)">Pedido #${idPedido}</span>`;
+    document.getElementById('gu-peso').value = '0.3';
+  }
+
   abrirModal('modal-guia');
 }
 
+function volverFase1Guia() {
+  document.getElementById('gu-fase-1').style.display = '';
+  document.getElementById('gu-fase-2').style.display = 'none';
+  _guiaRateSelect = null;
+}
+
+async function cotizarConEnvioClick() {
+  if (!_guiaPedido) { alert('Pedido no encontrado'); return; }
+  const peso = parseFloat(document.getElementById('gu-peso').value) || 0.3;
+
+  if (!_guiaPedido.Ciudad) {
+    alert('Este pedido no tiene ciudad de destino. Edítalo primero para agregar ciudad y dirección.');
+    return;
+  }
+
+  const btn = document.querySelector('#gu-fase-1 .btn-primary');
+  btn.disabled = true;
+  btn.textContent = '⏳ Cotizando…';
+
+  try {
+    const resp = await enviarScript('cotizar_envioclick', {
+      ..._guiaPedido,
+      Peso_Paquete: peso
+    });
+    if (resp.estado !== 'ok') throw new Error(resp.mensaje);
+
+    const { rates, daneDestino } = resp.data;
+    _guiaDane = daneDestino;
+
+    // Fecha de recol: hoy
+    const hoy = new Date();
+    const fechaStr = hoy.toISOString().slice(0, 10);
+    document.getElementById('gu-fecha-recol').value = fechaStr;
+
+    // Mostrar tarifas
+    const lista = document.getElementById('gu-lista-rates');
+    lista.innerHTML = '';
+    if (!rates || rates.length === 0) {
+      lista.innerHTML = '<p style="color:var(--muted);text-align:center">Sin tarifas disponibles para este destino.</p>';
+    } else {
+      rates.sort((a, b) => parseFloat(a.flete) - parseFloat(b.flete));
+      rates.forEach(r => {
+        const total = parseFloat(r.flete || 0) + parseFloat(r.minimumInsurance || 0);
+        const div = document.createElement('div');
+        div.className = 'rate-card';
+        div.style.cssText = 'border:2px solid var(--beige-b);border-radius:8px;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s';
+        div.dataset.rateId = r.idRate;
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span style="font-weight:700;font-size:14px">${r.carrier}</span>
+              ${r.deliveryDays ? `<span style="margin-left:8px;font-size:12px;color:var(--muted)">${r.deliveryDays} días</span>` : ''}
+            </div>
+            <div style="text-align:right">
+              <span style="font-weight:700;color:var(--tierra)">$${Math.round(total).toLocaleString('es-CO')}</span>
+              <div style="font-size:11px;color:var(--muted)">Flete + seguro mín.</div>
+            </div>
+          </div>`;
+        div.addEventListener('click', () => {
+          document.querySelectorAll('.rate-card').forEach(c => {
+            c.style.borderColor = 'var(--beige-b)';
+            c.style.background = '';
+          });
+          div.style.borderColor = 'var(--tierra)';
+          div.style.background  = '#fdf5f0';
+          _guiaRateSelect = { idRate: r.idRate, carrier: r.carrier, flete: r.flete, minimumInsurance: r.minimumInsurance };
+        });
+        lista.appendChild(div);
+      });
+    }
+
+    document.getElementById('gu-fase-1').style.display = 'none';
+    document.getElementById('gu-fase-2').style.display = '';
+  } catch(e) {
+    alert('Error al cotizar: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚀 Cotizar con EnvíoClick';
+  }
+}
+
+async function generarGuiaEnvioClick() {
+  if (!_guiaRateSelect) { alert('Selecciona una transportadora'); return; }
+  const btn = document.getElementById('gu-btn-generar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando guía…';
+
+  try {
+    const payload = {
+      ..._guiaPedido,
+      idRate:         _guiaRateSelect.idRate,
+      daneDestino:    _guiaDane,
+      transportadora: _guiaRateSelect.carrier,
+      pickupDate:     document.getElementById('gu-fecha-recol').value
+    };
+    const resp = await enviarScript('generar_guia_envioclick', payload);
+    if (resp.estado !== 'ok') throw new Error(resp.mensaje);
+
+    const { tracker, url } = resp.data;
+    _guiaPDFUrl = url || null;
+
+    // Mostrar fase 3 (éxito)
+    document.getElementById('gu-fase-2').style.display = 'none';
+    document.getElementById('gu-fase-3').style.display = '';
+    document.getElementById('gu-resultado-tracker').textContent = tracker;
+    document.getElementById('gu-resultado-carrier').textContent = _guiaRateSelect.carrier;
+    if (url) {
+      document.getElementById('gu-link-pdf').href = url;
+      document.getElementById('gu-btns-pdf').style.display = 'flex';
+    }
+  } catch(e) {
+    alert('Error al generar guía: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Generar guía';
+  }
+}
+
 async function guardarGuia() {
+  // Entrada manual (sin EnvíoClick)
   const pedido = document.getElementById('gu-pedido').value;
-  const guia   = document.getElementById('gu-numero').value;
+  const guia   = document.getElementById('gu-numero').value.trim();
   if (!pedido || !guia) { alert('Completa los campos obligatorios (*)'); return; }
   try {
     await enviarScript('guia', {
